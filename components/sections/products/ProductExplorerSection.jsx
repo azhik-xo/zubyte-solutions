@@ -1,31 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { PRODUCT_CATEGORIES } from "@/data/products";
+import { PRODUCT_CATEGORIES as FALLBACK_CATEGORIES } from "@/data/products";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * 20/80 Split Product Explorer with sidebar filter and product suite summary
+ * 20/80 Split Product Explorer fetching live product suites from MongoDB
  */
 export default function ProductExplorerSection() {
+  const [productSuites, setProductSuites] = useState(FALLBACK_CATEGORIES);
   const [activeCategory, setActiveCategory] = useState("All Products");
 
-  const allProducts = PRODUCT_CATEGORIES.flatMap((cat) =>
-    cat.products.map((prod) => ({
+  useEffect(() => {
+    const fetchLiveProducts = async () => {
+      try {
+        const res = await api.products.getAll();
+        if (res.data && res.data.length > 0) {
+          setProductSuites(res.data);
+        }
+      } catch (err) {
+        console.warn("Could not fetch live products from DB, using fallback:", err.message);
+      }
+    };
+    fetchLiveProducts();
+  }, []);
+
+  const allProducts = productSuites.flatMap((cat) =>
+    (cat.products || []).map((prod) => ({
       ...prod,
-      categoryLabel: cat.label,
+      categoryLabel: cat.label || cat.suite,
       suite: cat.suite,
-      color: cat.color,
-      img: cat.img,
+      color: cat.color || "#F1681D",
+      img: prod.img || cat.img || "photo-1551288049-bebda4e38f71",
     }))
   );
 
   const navCategories = [
     "All Products",
-    ...PRODUCT_CATEGORIES.map((c) => c.label),
+    ...productSuites.map((c) => c.label || c.suite),
   ];
 
   const visibleProducts =
@@ -82,15 +97,19 @@ export default function ProductExplorerSection() {
 
             {/* Product Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {visibleProducts.map((prod) => (
+              {visibleProducts.map((prod, idx) => (
                 <div
-                  key={prod.name}
+                  key={prod._id || prod.name || idx}
                   className="bg-white border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
                 >
                   {/* Thumbnail Image */}
                   <div className="relative h-44 overflow-hidden bg-[#222222]">
                     <img
-                      src={`https://images.unsplash.com/${prod.img}?w=600&h=350&fit=crop&auto=format`}
+                      src={
+                        prod.img?.startsWith("http") || prod.img?.startsWith("/")
+                          ? prod.img
+                          : `https://images.unsplash.com/${prod.img}?w=600&h=350&fit=crop&auto=format`
+                      }
                       alt={prod.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
@@ -106,7 +125,7 @@ export default function ProductExplorerSection() {
                           color: "#ffffff",
                         }}
                       >
-                        {prod.status}
+                        {prod.status || "Live"}
                       </span>
                     </div>
                   </div>
@@ -174,28 +193,28 @@ export default function ProductExplorerSection() {
             <p className="text-xs font-bold tracking-widest uppercase text-white/40 mb-2">
               All Product Suites
             </p>
-            {PRODUCT_CATEGORIES.map((cat) => (
+            {productSuites.map((cat, cIdx) => (
               <div
-                key={cat.id}
+                key={cat._id || cat.id || cIdx}
                 className="flex items-center gap-4 py-3 border-b border-white/10 last:border-0"
               >
                 <div
                   className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center"
-                  style={{ background: `${cat.color}20` }}
+                  style={{ background: `${cat.color || "#6366f1"}20` }}
                 >
                   <div
                     className="w-2.5 h-2.5 rounded-full"
-                    style={{ background: cat.color }}
+                    style={{ background: cat.color || "#6366f1" }}
                   />
                 </div>
                 <div className="flex-1">
                   <p className="text-white font-semibold text-sm">{cat.label}</p>
-                  <p className="text-xs font-semibold" style={{ color: cat.color }}>
+                  <p className="text-xs font-semibold" style={{ color: cat.color || "#6366f1" }}>
                     {cat.suite}
                   </p>
                 </div>
                 <span className="text-xs font-bold text-white/40">
-                  {cat.products.length} Products
+                  {cat.products?.length || 0} Products
                 </span>
               </div>
             ))}
@@ -205,4 +224,3 @@ export default function ProductExplorerSection() {
     </section>
   );
 }
-

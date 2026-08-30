@@ -1,29 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Container from "@/components/ui/Container";
-import { SERVICES } from "@/data/services";
+import { SERVICES as FALLBACK_SERVICES } from "@/data/services";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * Interactive Service Navigator tab panel
+ * Interactive Service Navigator tab panel fetching live from MongoDB
  */
 export default function ServicesNavigatorSection() {
+  const [serviceGroups, setServiceGroups] = useState(FALLBACK_SERVICES);
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
-  const activeGroup = SERVICES[activeGroupIndex];
+
+  useEffect(() => {
+    const fetchLiveServices = async () => {
+      try {
+        const res = await api.services.getAll();
+        if (res.data && res.data.length > 0) {
+          setServiceGroups(res.data);
+        }
+      } catch (err) {
+        console.warn("Could not fetch live services from DB, using cache:", err.message);
+      }
+    };
+    fetchLiveServices();
+  }, []);
+
+  const activeGroup = serviceGroups[activeGroupIndex] || serviceGroups[0] || FALLBACK_SERVICES[0];
 
   return (
     <section className="bg-[var(--background)] py-16 sm:py-20">
       <Container size="default">
         {/* Mobile Horizontal Tabs */}
         <div className="flex lg:hidden gap-2 overflow-x-auto pb-3 mb-8 scrollbar-hide">
-          {SERVICES.map((group, idx) => {
+          {serviceGroups.map((group, idx) => {
             const isSelected = activeGroupIndex === idx;
 
             return (
               <button
-                key={group.group}
+                key={group._id || group.group || idx}
                 type="button"
                 onClick={() => setActiveGroupIndex(idx)}
                 className={cn(
@@ -33,7 +50,7 @@ export default function ServicesNavigatorSection() {
                     : "bg-[#f0efe9] text-[#797876] hover:text-[#1b1b1b]"
                 )}
               >
-                <span>{group.icon}</span>
+                <span>{group.icon || "⬡"}</span>
                 <span>{group.group}</span>
               </button>
             );
@@ -44,12 +61,12 @@ export default function ServicesNavigatorSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Vertical Tab Rail */}
           <div className="hidden lg:flex lg:col-span-3 flex-col gap-2 sticky top-28">
-            {SERVICES.map((group, idx) => {
+            {serviceGroups.map((group, idx) => {
               const isSelected = activeGroupIndex === idx;
 
               return (
                 <button
-                  key={group.group}
+                  key={group._id || group.group || idx}
                   type="button"
                   onClick={() => setActiveGroupIndex(idx)}
                   className={cn(
@@ -59,7 +76,7 @@ export default function ServicesNavigatorSection() {
                       : "bg-transparent text-[#797876] hover:bg-black/5 hover:text-[#1b1b1b]"
                   )}
                 >
-                  <span className="text-lg shrink-0">{group.icon}</span>
+                  <span className="text-lg shrink-0">{group.icon || "⬡"}</span>
                   <span className="font-heading text-sm">{group.group}</span>
                   {isSelected && (
                     <span className="ml-auto text-xs text-[#F1681D]">→</span>
@@ -69,20 +86,26 @@ export default function ServicesNavigatorSection() {
             })}
 
             {/* Visual thumbnail preview */}
-            <div className="mt-4 rounded-2xl overflow-hidden aspect-[4/3] bg-[#e8e7e1] shadow-inner">
-              <img
-                src={`https://images.unsplash.com/${activeGroup.img}?w=400&h=300&fit=crop&auto=format`}
-                alt={activeGroup.group}
-                className="w-full h-full object-cover transition-opacity duration-300"
-                loading="lazy"
-              />
-            </div>
+            {activeGroup?.img && (
+              <div className="mt-4 rounded-2xl overflow-hidden aspect-[4/3] bg-[#e8e7e1] shadow-inner">
+                <img
+                  src={
+                    activeGroup.img.startsWith("http") || activeGroup.img.startsWith("/")
+                      ? activeGroup.img
+                      : `https://images.unsplash.com/${activeGroup.img}?w=400&h=300&fit=crop&auto=format`
+                  }
+                  alt={activeGroup.group}
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                  loading="lazy"
+                />
+              </div>
+            )}
           </div>
 
           {/* Right Service Cards Area */}
           <div className="lg:col-span-9">
             <div className="flex items-center gap-3 mb-8 pb-6 border-b border-[var(--border)]">
-              <span className="text-2xl text-[#1b1b1b]">{activeGroup.icon}</span>
+              <span className="text-2xl text-[#1b1b1b]">{activeGroup.icon || "⬡"}</span>
               <div>
                 <p className="text-xs font-semibold tracking-widest uppercase text-[var(--muted-foreground)]">
                   Discipline
@@ -92,19 +115,19 @@ export default function ServicesNavigatorSection() {
                 </h2>
               </div>
               <span className="ml-auto text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-white border border-[var(--border)] text-[var(--muted-foreground)]">
-                {activeGroup.items.length} services
+                {activeGroup.items?.length || 0} services
               </span>
             </div>
 
             {/* Grid of Service Offerings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activeGroup.items.map((item, idx) => {
+              {activeGroup.items?.map((item, idx) => {
                 const isDark = idx === 0;
                 const isOrange = idx === 1;
 
                 return (
                   <div
-                    key={item.name}
+                    key={item._id || item.name || idx}
                     className={cn(
                       "rounded-3xl p-6 sm:p-8 border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col justify-between min-h-[220px]",
                       isDark && "bg-[#1b1b1b] border-transparent text-white",
@@ -117,7 +140,7 @@ export default function ServicesNavigatorSection() {
                         <h3 className="font-heading font-bold text-lg sm:text-xl">
                           {item.name}
                         </h3>
-                        <span className="text-lg opacity-40">{activeGroup.icon}</span>
+                        <span className="text-lg opacity-40">{activeGroup.icon || "⬡"}</span>
                       </div>
 
                       <p
@@ -134,7 +157,7 @@ export default function ServicesNavigatorSection() {
 
                     <div>
                       <Link
-                        href={`/portfolio?service=${encodeURIComponent(activeGroup.portfolioKey)}`}
+                        href={`/portfolio?service=${encodeURIComponent(activeGroup.portfolioKey || activeGroup.group)}`}
                         className={cn(
                           "inline-flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase underline underline-offset-4 cursor-pointer transition-colors",
                           isDark && "text-white hover:text-white/80",
@@ -155,4 +178,3 @@ export default function ServicesNavigatorSection() {
     </section>
   );
 }
-

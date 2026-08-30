@@ -1,6 +1,5 @@
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import SiteLayout from "@/components/layout/SiteLayout";
 import { COMPANY_INFO } from "@/data/company";
 
 export const metadata = {
@@ -44,11 +43,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen flex flex-col bg-[var(--background)] text-[#1b1b1b] antialiased">
-        <Header />
-        <div className="flex-1 flex flex-col">{children}</div>
-        <Footer />
+        <SiteLayout>{children}</SiteLayout>
       </body>
     </html>
   );
 }
-

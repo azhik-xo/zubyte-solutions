@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Button from "@/components/ui/Button";
 import { COMPANY_INFO, GLOBAL_OFFICES } from "@/data/company";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
 
 /**
  * Validated Contact Form Section with dynamic file upload handling
@@ -17,6 +18,7 @@ export default function ContactFormSection() {
     message: "",
   });
   const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
   const [attachedFile, setAttachedFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -34,7 +36,7 @@ export default function ContactFormSection() {
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
 
@@ -44,14 +46,40 @@ export default function ContactFormSection() {
     }
 
     setErrors({});
+    setSubmitError("");
     setSubmitting(true);
 
-    // Simulate submission feedback
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      if (attachedFile) {
+        const payload = new FormData();
+        payload.append("firstName", formData.firstName);
+        payload.append("lastName", formData.lastName);
+        payload.append("email", formData.email);
+        payload.append("company", formData.company || "");
+        payload.append("message", formData.message);
+        payload.append("serviceInterest", "General Inquiry");
+        payload.append("attachment", attachedFile);
+        await api.inquiries.submit(payload);
+      } else {
+        await api.inquiries.submit({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          company: formData.company,
+          message: formData.message,
+          serviceInterest: "General Inquiry",
+        });
+      }
+
       setSubmitted(true);
-    }, 1000);
+    } catch (err) {
+      console.error("Submission failed:", err);
+      setSubmitError(err.message || "Failed to send inquiry. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
+
 
   const inputClasses = (field) =>
     cn(
@@ -120,6 +148,11 @@ export default function ContactFormSection() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                {submitError && (
+                  <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-xs text-red-600 font-semibold">
+                    {submitError}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* First Name */}
                   <div>

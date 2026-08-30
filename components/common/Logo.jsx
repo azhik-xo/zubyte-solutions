@@ -11,6 +11,8 @@ export default function Logo({
   className = "",
   showTagline = false,
   onClick,
+  isLink = true,
+  href = "/",
 }) {
   const content = (
     <div className={cn("inline-flex items-center gap-2.5 group cursor-pointer", className)}>
@@ -43,10 +45,13 @@ export default function Logo({
     </div>
   );
 
+  if (!isLink || !href) {
+    return content;
+  }
+
   return (
-    <Link href="/" onClick={onClick} aria-label="Zubyte Solution Home">
+    <Link href={href} onClick={onClick} aria-label="Zubyte Solution Home">
       {content}
     </Link>
   );
 }
-

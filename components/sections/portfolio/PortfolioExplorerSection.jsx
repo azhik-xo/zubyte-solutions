@@ -1,72 +1,282 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Container from "@/components/ui/Container";
-import { PORTFOLIO_PROJECTS } from "@/data/portfolio";
+import { PORTFOLIO_PROJECTS as FALLBACK_PROJECTS } from "@/data/portfolio";
+import { SERVICES as FALLBACK_SERVICES, ALL_SERVICE_NAMES as FALLBACK_NAMES } from "@/data/services";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * Portfolio Explorer with dynamic service filter and STAR framework breakdown cards
+ * Portfolio Explorer with dynamic service & case study fetching from MongoDB
  */
 export default function PortfolioExplorerSection({ initialService = "All Services" }) {
-  const [selectedService, setSelectedService] = useState(initialService);
+  const [projects, setProjects] = useState(FALLBACK_PROJECTS);
+  const [serviceGroups, setServiceGroups] = useState(FALLBACK_SERVICES);
+  const [selectedFilter, setSelectedFilter] = useState(initialService);
+  const [activeGroup, setActiveGroup] = useState("All");
   const [hoveredProject, setHoveredProject] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filterOptions = [
-    "All Services",
-    "Web Development",
-    "UI/UX Design",
-    "Digital Marketing",
-    "Cloud & DevOps",
-    "AI & Automation",
-  ];
+  useEffect(() => {
+    const fetchLivePortfolio = async () => {
+      try {
+        const [portRes, servRes] = await Promise.all([
+          api.portfolio.getAll(),
+          api.services.getAll(),
+        ]);
+        if (portRes.data && portRes.data.length > 0) {
+          setProjects(portRes.data);
+        }
+        if (servRes.data && servRes.data.length > 0) {
+          setServiceGroups(servRes.data);
+        }
+      } catch (err) {
+        console.warn("Could not fetch live portfolio from DB, using cache:", err.message);
+      }
+    };
+    fetchLivePortfolio();
+  }, []);
 
-  const filteredProjects =
-    selectedService === "All Services"
-      ? PORTFOLIO_PROJECTS
-      : PORTFOLIO_PROJECTS.filter((p) => p.service === selectedService);
+  // Compute all available service names dynamically
+  const allServiceNames = useMemo(() => {
+    const names = [];
+    serviceGroups.forEach((g) => {
+      if (g.items) {
+        g.items.forEach((i) => {
+          if (i.name && !names.includes(i.name)) names.push(i.name);
+        });
+      }
+    });
+    return names.length > 0 ? names : FALLBACK_NAMES;
+  }, [serviceGroups]);
+
+  // Discipline groups list
+  const groups = useMemo(() => {
+    const list = [{ name: "All", label: "All Disciplines" }];
+    serviceGroups.forEach((g) => {
+      const count = g.items?.length || 0;
+      list.push({
+        name: g.group,
+        label: `${g.group} (${count})`,
+      });
+    });
+    return list;
+  }, [serviceGroups]);
+
+  // Services to show in the filter options based on active group tab
+  const visibleFilterOptions = useMemo(() => {
+    if (activeGroup === "All") {
+      return ["All Services", ...allServiceNames];
+    }
+    const matchingGroup = serviceGroups.find((g) => g.group === activeGroup);
+    if (!matchingGroup || !matchingGroup.items) {
+      return ["All Services", ...allServiceNames];
+    }
+    return [activeGroup, ...matchingGroup.items.map((i) => i.name)];
+  }, [activeGroup, allServiceNames, serviceGroups]);
+
+  // Filtered projects
+  const filteredProjects = useMemo(() => {
+    return projects.filter((proj) => {
+      // 1. Search filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesQuery =
+          proj.title?.toLowerCase().includes(q) ||
+          proj.shortDesc?.toLowerCase().includes(q) ||
+          proj.service?.toLowerCase().includes(q) ||
+          (proj.subcategory && proj.subcategory.toLowerCase().includes(q)) ||
+          (proj.tags && proj.tags.some((t) => t.toLowerCase().includes(q)));
+
+        if (!matchesQuery) return false;
+      }
+
+      // 2. Service/Group filter
+      if (selectedFilter === "All Services" || selectedFilter === "All") {
+        if (activeGroup === "All") return true;
+        return proj.group === activeGroup || proj.tags?.includes(activeGroup);
+      }
+
+      // If selected filter matches a group name
+      const groupNames = serviceGroups.map((g) => g.group);
+      if (groupNames.includes(selectedFilter)) {
+        return proj.group === selectedFilter || proj.tags?.includes(selectedFilter);
+      }
+
+      // Specific service match
+      return (
+        proj.service === selectedFilter ||
+        proj.tags?.includes(selectedFilter) ||
+        proj.subcategory === selectedFilter
+      );
+    });
+  }, [selectedFilter, activeGroup, searchQuery, projects, serviceGroups]);
+
+  // Helper to count projects matching a specific filter
+  const getCountForFilter = (filterName) => {
+    if (filterName === "All Services" || filterName === "All") {
+      return projects.length;
+    }
+    const groupNames = serviceGroups.map((g) => g.group);
+    if (groupNames.includes(filterName)) {
+      return projects.filter(
+        (p) => p.group === filterName || p.tags?.includes(filterName)
+      ).length;
+    }
+    return projects.filter(
+      (p) =>
+        p.service === filterName ||
+        p.tags?.includes(filterName) ||
+        p.subcategory === filterName
+    ).length;
+  };
+
+  const handleGroupSelect = (groupName) => {
+    setActiveGroup(groupName);
+    if (groupName === "All") {
+      setSelectedFilter("All Services");
+    } else {
+      setSelectedFilter(groupName);
+    }
+  };
 
   return (
     <section className="bg-[var(--background)] py-16 sm:py-20">
       <Container size="default">
-        {/* Service Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-12 scrollbar-hide">
-          {filterOptions.map((service) => {
-            const isSelected = selectedService === service;
+        {/* Top Discipline Group Selector */}
+        <div className="flex flex-col gap-6 mb-10 pb-8 border-b border-[var(--border)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[var(--muted-foreground)] mb-1">
+                Filter by Discipline Group
+              </p>
+              <h2 className="font-heading font-bold text-xl sm:text-2xl text-[#1b1b1b]">
+                Explore Services & Case Studies
+              </h2>
+            </div>
 
-            return (
-              <button
-                key={service}
-                type="button"
-                onClick={() => setSelectedService(service)}
-                className={cn(
-                  "px-5 py-2.5 rounded-full text-xs font-semibold shrink-0 transition-all cursor-pointer select-none",
-                  isSelected
-                    ? "bg-[#1b1b1b] text-white shadow-sm font-bold"
-                    : "bg-white text-[#797876] border border-[var(--border)] hover:text-[#1b1b1b]"
-                )}
-              >
-                {service}
-              </button>
-            );
-          })}
+            {/* Quick Search */}
+            <div className="relative w-full sm:w-72">
+              <input
+                type="text"
+                placeholder="Search services or projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white border border-[var(--border)] rounded-full px-4 py-2.5 text-xs text-[#1b1b1b] placeholder:text-[#797876] outline-none focus:border-[#1b1b1b] shadow-2xs"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#797876] hover:text-[#1b1b1b]"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Discipline Level Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {groups.map((grp) => {
+              const isActive = activeGroup === grp.name;
+              return (
+                <button
+                  key={grp.name}
+                  type="button"
+                  onClick={() => handleGroupSelect(grp.name)}
+                  className={cn(
+                    "px-4 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all cursor-pointer select-none",
+                    isActive
+                      ? "bg-[#1b1b1b] text-white shadow-sm font-bold"
+                      : "bg-[var(--secondary)] text-[#797876] hover:text-[#1b1b1b] hover:bg-black/5"
+                  )}
+                >
+                  {grp.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* All Individual Services Filter List */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[11px] font-bold tracking-widest uppercase text-[var(--muted-foreground)]">
+              All Available Services ({visibleFilterOptions.length})
+            </p>
+            <span className="text-xs text-[var(--muted-foreground)]">
+              Showing {filteredProjects.length} {filteredProjects.length === 1 ? "case study" : "case studies"}
+            </span>
+          </div>
+
+          {/* Full Horizontal Scrollable & Wrappable Pill Filter Bar */}
+          <div className="flex flex-wrap gap-2">
+            {visibleFilterOptions.map((serviceName) => {
+              const isSelected = selectedFilter === serviceName;
+              const count = getCountForFilter(serviceName);
+
+              return (
+                <button
+                  key={serviceName}
+                  type="button"
+                  onClick={() => setSelectedFilter(serviceName)}
+                  className={cn(
+                    "inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer select-none border",
+                    isSelected
+                      ? "bg-[#F1681D] text-white border-[#F1681D] shadow-sm font-bold"
+                      : "bg-white text-[#555555] border-[var(--border)] hover:border-[#1b1b1b] hover:text-[#1b1b1b]"
+                  )}
+                >
+                  <span>{serviceName}</span>
+                  <span
+                    className={cn(
+                      "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
+                      isSelected
+                        ? "bg-white/25 text-white"
+                        : "bg-[var(--secondary)] text-[var(--muted-foreground)]"
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Projects Grid */}
         {filteredProjects.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-3xl border border-[var(--border)]">
-            <p className="text-[var(--muted-foreground)] text-base">
-              No projects listed yet for this service discipline.
+          <div className="text-center py-24 bg-white rounded-3xl border border-[var(--border)] shadow-xs">
+            <p className="text-lg font-heading font-bold text-[#1b1b1b] mb-2">
+              No matching case studies found
             </p>
+            <p className="text-[var(--muted-foreground)] text-sm mb-6 max-w-sm mx-auto">
+              We did not find case studies matching "{selectedFilter}". You can reset the filters to view all work.
+            </p>
+            <button
+              onClick={() => {
+                setActiveGroup("All");
+                setSelectedFilter("All Services");
+                setSearchQuery("");
+              }}
+              className="px-6 py-2.5 rounded-full text-xs font-bold bg-[#1b1b1b] text-white hover:bg-black transition-colors"
+            >
+              Reset Filters
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredProjects.map((proj) => {
+            {filteredProjects.map((proj, pIdx) => {
               const isHovered = hoveredProject === proj.title;
+              const displayImg =
+                proj.img?.startsWith("http") || proj.img?.startsWith("/")
+                  ? proj.img
+                  : `https://images.unsplash.com/${proj.img}?w=700&h=400&fit=crop&auto=format`;
 
               return (
                 <div
-                  key={proj.title}
+                  key={proj._id || proj.title || pIdx}
                   className="bg-white border border-[var(--border)] rounded-3xl overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
                   onMouseEnter={() => setHoveredProject(proj.title)}
                   onMouseLeave={() => setHoveredProject(null)}
@@ -74,7 +284,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                   {/* Project Image Banner & Hover Actions */}
                   <div className="relative h-48 sm:h-52 overflow-hidden bg-[#1b1b1b]">
                     <img
-                      src={`https://images.unsplash.com/${proj.img}?w=700&h=400&fit=crop&auto=format`}
+                      src={displayImg}
                       alt={proj.title}
                       className={cn(
                         "absolute inset-0 w-full h-full object-cover transition-transform duration-500",
@@ -84,11 +294,16 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                     />
                     <div className="absolute inset-0 bg-black/40" />
 
-                    {/* Subcategory Tag */}
-                    <div className="absolute top-3 left-3">
-                      <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20">
-                        {proj.subcategory || proj.service}
+                    {/* Service & Subcategory Badges */}
+                    <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#F1681D] text-white shadow-xs">
+                        {proj.service}
                       </span>
+                      {proj.subcategory && (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20">
+                          {proj.subcategory}
+                        </span>
+                      )}
                     </div>
 
                     {/* Action Overlay Links */}
@@ -152,21 +367,23 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                     </div>
 
                     {/* STAR Breakdown */}
-                    <div className="flex flex-col gap-2.5 pt-4 border-t border-[var(--border)] mt-auto">
-                      {proj.stars.map((star) => (
-                        <div key={star.label} className="flex items-start gap-2.5">
-                          <span
-                            className="text-[10px] font-bold tracking-widest uppercase mt-0.5 shrink-0 w-16"
-                            style={{ color: "#F1681D" }}
-                          >
-                            {star.label}
-                          </span>
-                          <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">
-                            {star.text}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                    {proj.stars && proj.stars.length > 0 && (
+                      <div className="flex flex-col gap-2.5 pt-4 border-t border-[var(--border)] mt-auto">
+                        {proj.stars.map((star, sIdx) => (
+                          <div key={star.label || sIdx} className="flex items-start gap-2.5">
+                            <span
+                              className="text-[10px] font-bold tracking-widest uppercase mt-0.5 shrink-0 w-16"
+                              style={{ color: "#F1681D" }}
+                            >
+                              {star.label}
+                            </span>
+                            <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                              {star.text}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -177,4 +394,3 @@ export default function PortfolioExplorerSection({ initialService = "All Service
     </section>
   );
 }
-

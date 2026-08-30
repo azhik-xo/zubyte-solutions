@@ -144,3 +144,14 @@ export const SERVICES = [
   },
 ];
 
+/**
+ * All individual service names (21 services across 5 groups)
+ */
+export const ALL_SERVICE_NAMES = SERVICES.flatMap((g) =>
+  g.items.map((item) => item.name)
+);
+
+/**
+ * All 5 high-level discipline groups
+ */
+export const ALL_DISCIPLINE_GROUPS = SERVICES.map((g) => g.group);

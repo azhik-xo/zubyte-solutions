@@ -1,16 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { FAQS } from "@/data/faqs";
+import { FAQS as FALLBACK_FAQS } from "@/data/faqs";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * FAQ Section with animated expandable accordion
+ * FAQ Section with dynamic live FAQs from MongoDB
  */
 export default function FaqSection() {
+  const [faqs, setFaqs] = useState(FALLBACK_FAQS);
   const [openIndex, setOpenIndex] = useState(null);
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const res = await api.company.getFaqs();
+        if (res.data && res.data.length > 0) {
+          setFaqs(res.data);
+        }
+      } catch (err) {
+        console.warn("Could not fetch FAQs from DB, using fallback:", err.message);
+      }
+    };
+    fetchFaqs();
+  }, []);
 
   const toggle = (idx) => {
     setOpenIndex(openIndex === idx ? null : idx);
@@ -26,11 +42,11 @@ export default function FaqSection() {
         />
 
         <div className="divide-y divide-[var(--border)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm bg-white">
-          {FAQS.map((faq, i) => {
+          {faqs.map((faq, i) => {
             const isOpen = openIndex === i;
 
             return (
-              <div key={i} className="transition-colors">
+              <div key={faq._id || i} className="transition-colors">
                 <button
                   type="button"
                   onClick={() => toggle(i)}
@@ -63,4 +79,3 @@ export default function FaqSection() {
     </section>
   );
 }
-
