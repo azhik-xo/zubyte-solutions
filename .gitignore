@@ -1,0 +1,79 @@
+# ==============================================================================
+# Zubyte Frontend — .gitignore
+# ==============================================================================
+
+# Dependencies
+# ------------------------------------------------------------------------------
+# Huge dependency folders installed via npm/yarn/pnpm. Never commit these;
+# they should always be installed fresh using `npm install` or `npm ci`.
+node_modules/
+/.pnp
+.pnp.js
+
+# Next.js Build Output & Cache
+# ------------------------------------------------------------------------------
+# Auto-generated build artifacts, static site exports, and internal caches.
+.next/
+out/
+build/
+dist/
+
+# Environment Variables & Secrets
+# ------------------------------------------------------------------------------
+# NEVER commit API keys, secret tokens, database credentials, or environment files.
+# Share `.env.example` instead with dummy values.
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug & Runtime Logs
+# ------------------------------------------------------------------------------
+# Log files created during development or npm/yarn/pnpm crashes.
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Operating System Files
+# ------------------------------------------------------------------------------
+# Hidden system files created by macOS, Windows, and Linux file explorers.
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# IDE & Editor Configurations
+# ------------------------------------------------------------------------------
+# Local workspace and editor preferences.
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Testing & Coverage
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+
+# TypeScript / Build Caches
+# ------------------------------------------------------------------------------
+*.tsbuildinfo
+.turbo/
+.vercel
+
