@@ -3,16 +3,18 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Container from "@/components/ui/Container";
+import { ServiceCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { SERVICES as FALLBACK_SERVICES } from "@/data/services";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * Interactive Service Navigator tab panel fetching live from MongoDB
+ * Interactive Service Navigator tab panel fetching live from MongoDB with Skeleton states
  */
 export default function ServicesNavigatorSection() {
   const [serviceGroups, setServiceGroups] = useState(FALLBACK_SERVICES);
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchLiveServices = async () => {
@@ -23,10 +25,13 @@ export default function ServicesNavigatorSection() {
         }
       } catch (err) {
         console.warn("Could not fetch live services from DB, using cache:", err.message);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchLiveServices();
   }, []);
+
 
   const activeGroup = serviceGroups[activeGroupIndex] || serviceGroups[0] || FALLBACK_SERVICES[0];
 
@@ -120,8 +125,21 @@ export default function ServicesNavigatorSection() {
             </div>
 
             {/* Grid of Service Offerings */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activeGroup.items?.map((item, idx) => {
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="rounded-3xl p-6 sm:p-8 border border-[var(--border)] bg-white space-y-3">
+                    <Skeleton className="h-6 w-40 rounded-lg" />
+                    <Skeleton className="h-3.5 w-full rounded-md" />
+                    <Skeleton className="h-3.5 w-3/4 rounded-md" />
+                    <Skeleton className="h-8 w-28 rounded-xl mt-4" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {activeGroup.items?.map((item, idx) => {
+
                 const isDark = idx === 0;
                 const isOrange = idx === 1;
 
@@ -172,9 +190,11 @@ export default function ServicesNavigatorSection() {
                 );
               })}
             </div>
+          )}
           </div>
         </div>
       </Container>
+
     </section>
   );
 }

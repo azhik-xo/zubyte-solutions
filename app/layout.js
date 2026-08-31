@@ -1,5 +1,6 @@
 import "./globals.css";
 import SiteLayout from "@/components/layout/SiteLayout";
+import SmoothScroll from "@/components/ui/SmoothScroll";
 import { COMPANY_INFO } from "@/data/company";
 
 export const metadata = {
@@ -22,6 +23,13 @@ export const metadata = {
   ],
   authors: [{ name: "Zubyte IT Solutions Inc." }],
   creator: "Zubyte IT Solutions Inc.",
+  icons: {
+    icon: [
+      { url: "/logos/favicon_logo.png", type: "image/png" },
+    ],
+    shortcut: "/logos/favicon_logo.png",
+    apple: "/logos/favicon_logo.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -43,7 +51,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen flex flex-col bg-[var(--background)] text-[#1b1b1b] antialiased">
-        <SiteLayout>{children}</SiteLayout>
+        <SmoothScroll>
+          <SiteLayout>{children}</SiteLayout>
+        </SmoothScroll>
       </body>
     </html>
   );

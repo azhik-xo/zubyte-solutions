@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Button from "@/components/ui/Button";
+import Reveal from "@/components/ui/Reveal";
 import { COMPANY_INFO, GLOBAL_OFFICES } from "@/data/company";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -93,27 +94,31 @@ export default function ContactFormSection() {
     <section className="bg-[var(--background)] pt-36 pb-20 sm:pb-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
         {/* Headline */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="text-xs font-semibold tracking-[0.22em] uppercase text-[var(--muted-foreground)] mb-4">
-            Get in touch
-          </p>
-          <h1
-            className="font-heading font-bold text-[#1b1b1b] leading-[1.04] mb-6"
-            style={{ fontSize: "clamp(2.6rem, 5.5vw, 4.8rem)" }}
-          >
-            Let's build the future
-            <br />
-            together.
-          </h1>
-          <p className="text-[var(--muted-foreground)] text-base leading-relaxed">
-            Whether you are looking to transform your enterprise architecture, launch a new product, or build a dedicated engineering team, we are ready to collaborate.
-          </p>
-        </div>
+        <Reveal direction="up" delay={50} duration={600}>
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <p className="text-xs font-semibold tracking-[0.22em] uppercase text-[var(--muted-foreground)] mb-4">
+              Get in touch
+            </p>
+            <h1
+              className="font-heading font-bold text-[#1b1b1b] leading-[1.04] mb-6"
+              style={{ fontSize: "clamp(2.6rem, 5.5vw, 4.8rem)" }}
+            >
+              Let's build the future
+              <br />
+              together.
+            </h1>
+            <p className="text-[var(--muted-foreground)] text-base leading-relaxed">
+              Whether you are looking to transform your enterprise architecture, launch a new product, or build a dedicated engineering team, we are ready to collaborate.
+            </p>
+          </div>
+        </Reveal>
 
         {/* 2-Column Grid: Form Left, Contact Info Right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 items-start mb-20">
           {/* Left: Form Container */}
-          <div className="lg:col-span-7 bg-white border border-[var(--border)] rounded-3xl p-8 sm:p-10 shadow-sm">
+          <Reveal direction="up" delay={100} duration={700} className="lg:col-span-7">
+            <div className="bg-white border border-[var(--border)] rounded-3xl p-8 sm:p-10 shadow-sm">
+
             {submitted ? (
               <div className="py-16 text-center animate-in fade-in duration-300">
                 <div
@@ -340,10 +345,11 @@ export default function ContactFormSection() {
                 </div>
               </form>
             )}
-          </div>
+            </div>
+          </Reveal>
 
           {/* Right: Contact & Direct Inquiries Info */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
+          <Reveal direction="up" delay={200} duration={700} className="lg:col-span-5 flex flex-col gap-6">
             {/* Quick CTA Box */}
             <div className="bg-[#1b1b1b] rounded-3xl p-8 text-white shadow-xl border border-white/10 flex flex-col justify-between min-h-[220px]">
               <div>
@@ -404,10 +410,11 @@ export default function ContactFormSection() {
                 ))}
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
   );
 }
+
 

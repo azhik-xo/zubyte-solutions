@@ -3,16 +3,18 @@
 import React, { useState, useEffect } from "react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
+import { ProductCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { PRODUCT_CATEGORIES as FALLBACK_CATEGORIES } from "@/data/products";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * 20/80 Split Product Explorer fetching live product suites from MongoDB
+ * 20/80 Split Product Explorer fetching live product suites from MongoDB with Skeleton states
  */
 export default function ProductExplorerSection() {
   const [productSuites, setProductSuites] = useState(FALLBACK_CATEGORIES);
   const [activeCategory, setActiveCategory] = useState("All Products");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchLiveProducts = async () => {
@@ -23,6 +25,8 @@ export default function ProductExplorerSection() {
         }
       } catch (err) {
         console.warn("Could not fetch live products from DB, using fallback:", err.message);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchLiveProducts();
@@ -96,68 +100,76 @@ export default function ProductExplorerSection() {
             </div>
 
             {/* Product Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {visibleProducts.map((prod, idx) => (
-                <div
-                  key={prod._id || prod.name || idx}
-                  className="bg-white border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-                >
-                  {/* Thumbnail Image */}
-                  <div className="relative h-44 overflow-hidden bg-[#222222]">
-                    <img
-                      src={
-                        prod.img?.startsWith("http") || prod.img?.startsWith("/")
-                          ? prod.img
-                          : `https://images.unsplash.com/${prod.img}?w=600&h=350&fit=crop&auto=format`
-                      }
-                      alt={prod.name}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {visibleProducts.map((prod, idx) => (
+                  <div
+                    key={prod._id || prod.name || idx}
+                    className="bg-white border border-[var(--border)] rounded-2xl overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                  >
+                    {/* Thumbnail Image */}
+                    <div className="relative h-44 overflow-hidden bg-[#222222]">
+                      <img
+                        src={
+                          prod.img?.startsWith("http") || prod.img?.startsWith("/")
+                            ? prod.img
+                            : `https://images.unsplash.com/${prod.img}?w=600&h=350&fit=crop&auto=format`
+                        }
+                        alt={prod.name}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-                    {/* Status Badge */}
-                    <div className="absolute top-3 right-3">
-                      <span
-                        className="text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"
-                        style={{
-                          background: prod.status === "Live" ? "#10b981" : "#F1681D",
-                          color: "#ffffff",
-                        }}
-                      >
-                        {prod.status || "Live"}
-                      </span>
+                      {/* Status Badge */}
+                      <div className="absolute top-3 right-3">
+                        <span
+                          className="text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm"
+                          style={{
+                            background: prod.status === "Live" ? "#10b981" : "#F1681D",
+                            color: "#ffffff",
+                          }}
+                        >
+                          {prod.status || "Live"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-6 flex flex-col gap-3 flex-1 justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted-foreground)] mb-1">
+                          {prod.suite}
+                        </p>
+                        <h3 className="font-heading font-bold text-[#1b1b1b] text-base leading-snug mb-2">
+                          {prod.name}
+                        </h3>
+                        <p className="text-[var(--muted-foreground)] text-xs leading-relaxed">
+                          {prod.desc}
+                        </p>
+                      </div>
+
+                      <div className="pt-4 border-t border-[var(--border)]">
+                        <Button
+                          href="/contact"
+                          variant="primary"
+                          size="sm"
+                          className="w-full justify-center text-xs py-2.5"
+                        >
+                          Try Now
+                        </Button>
+                      </div>
                     </div>
                   </div>
-
-                  {/* Card Content */}
-                  <div className="p-6 flex flex-col gap-3 flex-1 justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted-foreground)] mb-1">
-                        {prod.suite}
-                      </p>
-                      <h3 className="font-heading font-bold text-[#1b1b1b] text-base leading-snug mb-2">
-                        {prod.name}
-                      </h3>
-                      <p className="text-[var(--muted-foreground)] text-xs leading-relaxed">
-                        {prod.desc}
-                      </p>
-                    </div>
-
-                    <div className="pt-4 border-t border-[var(--border)]">
-                      <Button
-                        href="/contact"
-                        variant="primary"
-                        size="sm"
-                        className="w-full justify-center text-xs py-2.5"
-                      >
-                        Try Now
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

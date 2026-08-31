@@ -1,10 +1,11 @@
 import React from "react";
 import Container from "@/components/ui/Container";
 import Badge from "@/components/ui/Badge";
+import Reveal from "@/components/ui/Reveal";
 import { COMPANY_INFO } from "@/data/company";
 
 /**
- * About Page Split Hero Section
+ * About Page Split Hero Section with Reveal entrance
  */
 export default function AboutHeroSection() {
   return (
@@ -12,7 +13,7 @@ export default function AboutHeroSection() {
       <Container size="default">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center pb-12">
           {/* Left Content */}
-          <div className="flex flex-col justify-center">
+          <Reveal direction="up" delay={50} duration={700} className="flex flex-col justify-center">
             <Badge color="#F1681D" dot className="self-start mb-6">
               About Zubyte
             </Badge>
@@ -47,10 +48,10 @@ export default function AboutHeroSection() {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
 
           {/* Right Image Composition */}
-          <div className="relative h-[440px] sm:h-[500px]">
+          <Reveal direction="scale" delay={150} duration={800} className="relative h-[440px] sm:h-[500px]">
             <div className="absolute inset-0 rounded-3xl overflow-hidden shadow-xl border border-black/5 bg-[#e8e7e1]">
               <img
                 src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=900&h=1000&fit=crop&crop=center&auto=format"
@@ -74,7 +75,7 @@ export default function AboutHeroSection() {
               <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-[#F1681D]" />
               End-to-end ownership
             </div>
-          </div>
+          </Reveal>
         </div>
 
         <div className="h-px w-full bg-[var(--border)]" />
@@ -82,4 +83,3 @@ export default function AboutHeroSection() {
     </section>
   );
 }
-

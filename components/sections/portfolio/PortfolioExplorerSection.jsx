@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Container from "@/components/ui/Container";
+import { PortfolioCardSkeleton } from "@/components/ui/Skeleton";
 import { PORTFOLIO_PROJECTS as FALLBACK_PROJECTS } from "@/data/portfolio";
 import { SERVICES as FALLBACK_SERVICES, ALL_SERVICE_NAMES as FALLBACK_NAMES } from "@/data/services";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * Portfolio Explorer with dynamic service & case study fetching from MongoDB
+ * Portfolio Explorer with dynamic service & case study fetching from MongoDB and Skeleton state
  */
 export default function PortfolioExplorerSection({ initialService = "All Services" }) {
   const [projects, setProjects] = useState(FALLBACK_PROJECTS);
@@ -17,6 +18,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
   const [activeGroup, setActiveGroup] = useState("All");
   const [hoveredProject, setHoveredProject] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchLivePortfolio = async () => {
@@ -33,10 +35,13 @@ export default function PortfolioExplorerSection({ initialService = "All Service
         }
       } catch (err) {
         console.warn("Could not fetch live portfolio from DB, using cache:", err.message);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchLivePortfolio();
   }, []);
+
 
   // Compute all available service names dynamically
   const allServiceNames = useMemo(() => {
@@ -246,8 +251,15 @@ export default function PortfolioExplorerSection({ initialService = "All Service
         </div>
 
         {/* Projects Grid */}
-        {filteredProjects.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <PortfolioCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : filteredProjects.length === 0 ? (
           <div className="text-center py-24 bg-white rounded-3xl border border-[var(--border)] shadow-xs">
+
             <p className="text-lg font-heading font-bold text-[#1b1b1b] mb-2">
               No matching case studies found
             </p>

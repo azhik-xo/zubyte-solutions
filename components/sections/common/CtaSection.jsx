@@ -1,6 +1,7 @@
 import React from "react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
+import Reveal from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,53 +22,54 @@ export default function CtaSection({
   return (
     <section className={cn("py-20 sm:py-28", className)}>
       <Container size="default">
-        <div
-          className={cn(
-            "rounded-3xl p-10 sm:p-16 text-center relative overflow-hidden",
-            isDark ? "bg-[#1b1b1b] text-white" : "bg-[#f0efe9] text-[#1b1b1b]"
-          )}
-        >
-          {/* Background ambient glow if dark */}
-          {isDark && (
-            <div
-              className="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-[100px] pointer-events-none opacity-20"
-              style={{ background: "#F1681D" }}
-            />
-          )}
-
-          <h2
-            className="font-heading font-bold leading-tight mb-5 max-w-2xl mx-auto"
-            style={{ fontSize: "clamp(2rem, 4.5vw, 3.5rem)" }}
-          >
-            {title}
-          </h2>
-
-          <p
+        <Reveal direction="scale" delay={50} duration={800}>
+          <div
             className={cn(
-              "mb-10 max-w-md mx-auto text-sm sm:text-base leading-relaxed",
-              isDark ? "text-white/60" : "text-[var(--muted-foreground)]"
+              "rounded-3xl p-10 sm:p-16 text-center relative overflow-hidden shadow-lg",
+              isDark ? "bg-[#1b1b1b] text-white" : "bg-[#f0efe9] text-[#1b1b1b]"
             )}
           >
-            {description}
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Button href={primaryBtnHref} variant="orange" size="md">
-              {primaryBtnText}
-            </Button>
-            {secondaryBtnText && (
-              <Button
-                href={secondaryBtnHref}
-                variant={isDark ? "outlineDark" : "outline"}
-                size="md"
-              >
-                {secondaryBtnText}
-              </Button>
+            {/* Background ambient glow if dark */}
+            {isDark && (
+              <div
+                className="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-[100px] pointer-events-none opacity-20"
+                style={{ background: "#F1681D" }}
+              />
             )}
+
+            <h2
+              className="font-heading font-bold leading-tight mb-5 max-w-2xl mx-auto"
+              style={{ fontSize: "clamp(2rem, 4.5vw, 3.5rem)" }}
+            >
+              {title}
+            </h2>
+
+            <p
+              className={cn(
+                "mb-10 max-w-md mx-auto text-sm sm:text-base leading-relaxed",
+                isDark ? "text-white/60" : "text-[var(--muted-foreground)]"
+              )}
+            >
+              {description}
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Button href={primaryBtnHref} variant="orange" size="md">
+                {primaryBtnText}
+              </Button>
+              {secondaryBtnText && (
+                <Button
+                  href={secondaryBtnHref}
+                  variant={isDark ? "outlineDark" : "outline"}
+                  size="md"
+                >
+                  {secondaryBtnText}
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );
 }
-
