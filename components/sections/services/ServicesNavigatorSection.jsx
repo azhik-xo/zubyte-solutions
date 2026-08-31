@@ -175,7 +175,7 @@ export default function ServicesNavigatorSection() {
 
                     <div>
                       <Link
-                        href={`/portfolio?service=${encodeURIComponent(activeGroup.portfolioKey || activeGroup.group)}`}
+                        href={`/portfolio?service=${encodeURIComponent(item.name)}`}
                         className={cn(
                           "inline-flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase underline underline-offset-4 cursor-pointer transition-colors",
                           isDark && "text-white hover:text-white/80",
@@ -186,6 +186,7 @@ export default function ServicesNavigatorSection() {
                         Proof of Work →
                       </Link>
                     </div>
+
                   </div>
                 );
               })}

@@ -72,6 +72,16 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    label: "Client Marquee & Stats",
+    href: "/admin/clients",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="10 8 16 12 10 16 10 8" />
+      </svg>
+    ),
+  },
 ];
 
 export default function AdminLayout({ children }) {
@@ -87,9 +97,9 @@ export default function AdminLayout({ children }) {
   const isAdmin = role === "admin";
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-white flex flex-col md:flex-row antialiased">
+    <div className="h-screen h-[100dvh] bg-[#0d0d0d] text-white flex flex-col md:flex-row antialiased overflow-hidden">
       {/* Mobile Top Bar */}
-      <div className="md:hidden flex items-center justify-between px-5 py-4 bg-[#141414] border-b border-white/10 sticky top-0 z-40">
+      <div className="md:hidden flex items-center justify-between px-5 py-4 bg-[#141414] border-b border-white/10 shrink-0 z-40">
         <Link href="/admin" className="flex items-center gap-2">
           <Logo light isLink={false} />
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-white/80 uppercase tracking-widest">
@@ -111,15 +121,23 @@ export default function AdminLayout({ children }) {
         </button>
       </div>
 
-      {/* Sidebar Navigation */}
+      {/* Mobile Backdrop Overlay */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          className="md:hidden fixed inset-0 bg-black/70 backdrop-blur-xs z-40"
+        />
+      )}
+
+      {/* Sidebar Navigation — Screen height fixed container */}
       <aside
         className={cn(
-          "w-full md:w-64 lg:w-72 bg-[#141414] border-r border-white/10 flex flex-col shrink-0 z-30 transition-all duration-300 md:static fixed inset-y-0 left-0",
+          "w-64 lg:w-72 bg-[#141414] border-r border-white/10 flex flex-col shrink-0 z-50 transition-transform duration-300 md:static fixed inset-y-0 left-0 h-full md:h-screen md:h-[100dvh] overflow-hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
         {/* Brand Header */}
-        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+        <div className="p-6 border-b border-white/10 flex items-center justify-between shrink-0">
           <Link href="/admin" className="flex items-center gap-3">
             <Logo light isLink={false} />
           </Link>
@@ -136,7 +154,7 @@ export default function AdminLayout({ children }) {
         </div>
 
         {/* User Info Capsule */}
-        <div className="mx-4 my-4 p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
+        <div className="mx-4 my-4 p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 shrink-0">
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#F1681D] to-[#ff9966] flex items-center justify-center font-bold text-white text-sm shrink-0">
             {user?.name ? user.name.charAt(0).toUpperCase() : "Z"}
           </div>
@@ -146,8 +164,8 @@ export default function AdminLayout({ children }) {
           </div>
         </div>
 
-        {/* Nav Links */}
-        <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto">
+        {/* Nav Links — Scrollable if needed */}
+        <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto scrollbar-hide">
           {NAV_ITEMS.map((item) => {
             const isActive =
               item.href === "/admin"
@@ -176,7 +194,7 @@ export default function AdminLayout({ children }) {
         </nav>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-white/10 flex flex-col gap-2">
+        <div className="p-4 border-t border-white/10 flex flex-col gap-2 shrink-0">
           <Link
             href="/"
             target="_blank"
@@ -203,11 +221,12 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 min-w-0 bg-[#0d0d0d] flex flex-col overflow-y-auto">
-        <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto w-full">{children}</div>
+      {/* Main Content Area — Dedicated scrollable container */}
+      <main className="flex-1 min-w-0 bg-[#0d0d0d] flex flex-col h-full overflow-y-auto">
+        <div className="p-6 sm:p-8 lg:p-10 max-w-7xl mx-auto w-full flex-1">
+          {children}
+        </div>
       </main>
     </div>
   );
 }
-
