@@ -8,11 +8,11 @@ import Reveal from "@/components/ui/Reveal";
  */
 export default function HeroSection() {
   return (
-    <section className="bg-[var(--background)] pt-36 pb-20 overflow-hidden">
+    <section className="bg-(--background) pt-36 pb-20 overflow-hidden">
       <Container size="default" className="flex flex-col items-center text-center">
         {/* Eyebrow */}
         <Reveal direction="up" delay={50} duration={600}>
-          <p className="text-xs font-semibold tracking-[0.22em] uppercase text-[var(--muted-foreground)] mb-6">
+          <p className="text-xs font-semibold tracking-[0.22em] uppercase text-(--muted-foreground) mb-6">
             Next-gen IT solutions
           </p>
         </Reveal>
@@ -31,7 +31,7 @@ export default function HeroSection() {
 
         {/* Subtitle */}
         <Reveal direction="up" delay={250} duration={700}>
-          <p className="text-[var(--muted-foreground)] text-base sm:text-lg leading-relaxed max-w-xl mb-10">
+          <p className="text-(--muted-foreground) text-base sm:text-lg leading-relaxed max-w-xl mb-10">
             Empowers teams that move at full stride, unlocks unprecedented business speed and delivers reliable engineering at scale.
           </p>
         </Reveal>
@@ -49,7 +49,7 @@ export default function HeroSection() {
         </Reveal>
 
         {/* Grain Gradient Intelligence Card */}
-        <Reveal direction="scale" delay={400} duration={800} className="w-full">
+        {/* <Reveal direction="scale" delay={400} duration={800} className="w-full">
           <div className="w-full relative rounded-3xl overflow-hidden aspect-[16/7] sm:aspect-[21/9] grain-gradient-bg shadow-xl border border-black/10">
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="inline-flex items-center gap-3 bg-white/15 backdrop-blur-md text-white text-sm sm:text-base font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl border border-white/25 shadow-2xl">
@@ -70,7 +70,7 @@ export default function HeroSection() {
               </span>
             </div>
           </div>
-        </Reveal>
+        </Reveal> */}
       </Container>
     </section>
   );

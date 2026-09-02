@@ -1,13 +1,15 @@
+"use client";
+
 import React from "react";
 import Container from "@/components/ui/Container";
 import Reveal from "@/components/ui/Reveal";
-import { LEADERSHIP } from "@/data/company";
+import { useCompany } from "@/context/CompanyContext";
 
 /**
- * Leadership Testimonial / Quote Section with Reveal entrance
+ * Leadership Testimonial / Quote Section with Reveal entrance and dynamic founder data
  */
 export default function TestimonialSection() {
-  const { founder } = LEADERSHIP;
+  const { leadership } = useCompany();
 
   return (
     <section className="bg-[var(--secondary)] border-y border-[var(--border)] py-20 sm:py-24">
@@ -21,7 +23,7 @@ export default function TestimonialSection() {
             className="font-heading font-bold text-[#1b1b1b] leading-snug mb-8 max-w-2xl mx-auto"
             style={{ fontSize: "clamp(1.4rem, 3vw, 2.1rem)" }}
           >
-            {founder.quote}
+            {leadership.quote}
           </blockquote>
 
           <div className="flex items-center justify-center gap-3.5">
@@ -30,14 +32,14 @@ export default function TestimonialSection() {
               className="w-11 h-11 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm"
               style={{ background: "#F1681D" }}
             >
-              {founder.initials}
+              {leadership.initials || "DM"}
             </div>
             <div className="text-left">
               <p className="text-sm font-bold text-[#1b1b1b] leading-tight">
-                {founder.name}
+                {leadership.name}
               </p>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                {founder.role}
+                {leadership.role}
               </p>
             </div>
           </div>

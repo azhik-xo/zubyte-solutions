@@ -9,7 +9,7 @@ export const COMPANY_INFO = {
   tagline: "Where Ideas Evolve Into Products",
   description:
     "End-to-end technology partner for companies that want to build, grow and operate with confidence. We engineer bespoke software, intelligent systems, and scalable product platforms.",
-  email: "hello@zubyte.com",
+  email: "hello@zubyte.org",
   phone: "+1 (800) 555-0199",
   foundedYear: "2025",
   copyrightYear: new Date().getFullYear(),

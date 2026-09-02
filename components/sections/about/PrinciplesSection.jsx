@@ -1,12 +1,16 @@
+"use client";
+
 import React from "react";
 import Container from "@/components/ui/Container";
 import Reveal from "@/components/ui/Reveal";
-import { CORE_VALUES } from "@/data/company";
+import { useCompany } from "@/context/CompanyContext";
 
 /**
- * Principles of Practice Bento Section with Reveal entrance
+ * Principles of Practice Bento Section with Reveal entrance and dynamic core values
  */
 export default function PrinciplesSection() {
+  const { coreValues } = useCompany();
+
   return (
     <section className="bg-[#1b1b1b] py-20 sm:py-24 text-white border-y border-white/10">
       <Container size="default">
@@ -17,9 +21,7 @@ export default function PrinciplesSection() {
               <p className="text-xs font-semibold tracking-[0.22em] uppercase text-white/40 mb-3">
                 Principles of Practice
               </p>
-              <h2
-                className="font-heading font-bold text-3xl sm:text-4xl text-white"
-              >
+              <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white">
                 The core tenets
                 <br />
                 that guide us.
@@ -33,12 +35,12 @@ export default function PrinciplesSection() {
 
         {/* 3 Bento Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {CORE_VALUES.map((val, idx) => {
+          {coreValues.map((val, idx) => {
             const isFeatured = idx === 1;
 
             return (
               <Reveal
-                key={val.name}
+                key={val.name || idx}
                 direction="up"
                 delay={100 + idx * 100}
                 duration={700}
@@ -57,7 +59,7 @@ export default function PrinciplesSection() {
                     {val.num}
                   </p>
 
-                  <div className="text-3xl mb-6 text-white/90">{val.icon}</div>
+                  <div className="text-3xl mb-6 text-white/90">{val.icon || "◈"}</div>
 
                   <h3 className="font-heading font-bold text-xl sm:text-2xl mb-3 text-white">
                     {val.name}

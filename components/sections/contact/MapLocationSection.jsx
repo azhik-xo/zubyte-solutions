@@ -1,11 +1,17 @@
+"use client";
+
 import React from "react";
 import Container from "@/components/ui/Container";
-import { GLOBAL_OFFICES } from "@/data/company";
+import { useCompany } from "@/context/CompanyContext";
 
 /**
- * Interactive Google Maps Location Section & Global Offices
+ * Interactive Google Maps Location Section & Global Offices with dynamic locations
  */
 export default function MapLocationSection() {
+  const { offices } = useCompany();
+
+  const mainAddress = offices[0]?.address || "One World Trade Center, Suite 4500, New York, NY 10007, United States";
+
   return (
     <section className="bg-[var(--background)] pb-24 sm:pb-28">
       <Container size="default">
@@ -22,7 +28,7 @@ export default function MapLocationSection() {
             </h2>
           </div>
           <div className="text-sm text-[var(--muted-foreground)] max-w-xs leading-relaxed">
-            {GLOBAL_OFFICES[0].address}
+            {mainAddress}
           </div>
         </div>
 
@@ -36,15 +42,15 @@ export default function MapLocationSection() {
             loading="lazy"
             allowFullScreen
             referrerPolicy="no-referrer-when-downgrade"
-            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=One+World+Trade+Center,New+York,NY"
+            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=${encodeURIComponent(mainAddress)}`}
           />
         </div>
 
         {/* Global Office Pills */}
         <div className="flex flex-wrap gap-3 mt-6">
-          {GLOBAL_OFFICES.map((loc) => (
+          {offices.map((loc) => (
             <div
-              key={loc.city}
+              key={loc.city || loc.address}
               className="flex items-center gap-2.5 bg-[var(--secondary)] border border-[var(--border)] rounded-full px-5 py-2.5 shadow-2xs"
             >
               <span className="w-2 h-2 rounded-full shrink-0 bg-[#F1681D]" />
@@ -57,4 +63,3 @@ export default function MapLocationSection() {
     </section>
   );
 }
-

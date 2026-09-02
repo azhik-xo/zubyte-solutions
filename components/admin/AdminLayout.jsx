@@ -73,12 +73,16 @@ const NAV_ITEMS = [
     ),
   },
   {
-    label: "Client Marquee & Stats",
-    href: "/admin/clients",
+    label: "Company & Branding",
+    href: "/admin/company",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <polygon points="10 8 16 12 10 16 10 8" />
+        <path d="M3 21h18" />
+        <path d="M5 21V7l8-4v18" />
+        <path d="M19 21V11l-6-4" />
+        <path d="M9 9h1" />
+        <path d="M9 13h1" />
+        <path d="M9 17h1" />
       </svg>
     ),
   },

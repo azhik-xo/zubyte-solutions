@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/components/admin/AuthProvider";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -201,14 +202,22 @@ export default function AdminClientsPage() {
           </p>
         </div>
 
-        {isAuthorized && (
-          <button
-            onClick={handleOpenAdd}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-[#F1681D] hover:bg-[#d65715] text-white transition-all shadow-md shrink-0 cursor-pointer"
+        <div className="flex items-center gap-3 shrink-0">
+          <Link
+            href="/admin/company?tab=clients"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
           >
-            <span>+ Add Client Partner</span>
-          </button>
-        )}
+            <span>🏢 All Company Settings →</span>
+          </Link>
+          {isAuthorized && (
+            <button
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-[#F1681D] hover:bg-[#d65715] text-white transition-all shadow-md cursor-pointer"
+            >
+              <span>+ Add Client Partner</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Toast Notification */}

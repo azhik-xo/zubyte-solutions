@@ -1,13 +1,23 @@
+"use client";
+
 import React from "react";
 import Container from "@/components/ui/Container";
 import Badge from "@/components/ui/Badge";
 import Reveal from "@/components/ui/Reveal";
-import { COMPANY_INFO } from "@/data/company";
+import { useCompany } from "@/context/CompanyContext";
 
 /**
- * About Page Split Hero Section with Reveal entrance
+ * About Page Split Hero Section with Reveal entrance and dynamic company metrics
  */
 export default function AboutHeroSection() {
+  const { companyInfo, stats } = useCompany();
+
+  const heroStats = [
+    { v: stats[0]?.stat || "50+", l: stats[0]?.label || "Projects shipped" },
+    { v: "3", l: "Continents" },
+    { v: stats[1]?.stat || "98%", l: stats[1]?.label || "Client retention" },
+  ];
+
   return (
     <section className="bg-[var(--background)] pt-36 pb-16 overflow-hidden">
       <Container size="default">
@@ -15,7 +25,7 @@ export default function AboutHeroSection() {
           {/* Left Content */}
           <Reveal direction="up" delay={50} duration={700} className="flex flex-col justify-center">
             <Badge color="#F1681D" dot className="self-start mb-6">
-              About Zubyte
+              About {companyInfo.shortName || companyInfo.name}
             </Badge>
 
             <h1
@@ -30,16 +40,12 @@ export default function AboutHeroSection() {
             </h1>
 
             <p className="text-[var(--muted-foreground)] text-base leading-relaxed max-w-md mb-8">
-              We build operating systems for modern work, blending deep technical expertise with a refined aesthetic to empower visionaries worldwide.
+              {companyInfo.description}
             </p>
 
             {/* Stats Row */}
             <div className="flex flex-wrap gap-8 pt-8 border-t border-[var(--border)]">
-              {[
-                { v: "50+", l: "Projects shipped" },
-                { v: "3", l: "Continents" },
-                { v: "98%", l: "Client retention" },
-              ].map((s) => (
+              {heroStats.map((s) => (
                 <div key={s.l}>
                   <p className="font-brand font-bold text-2xl text-[#F1681D]">{s.v}</p>
                   <p className="text-[var(--muted-foreground)] text-xs tracking-widest uppercase mt-0.5">
@@ -65,7 +71,7 @@ export default function AboutHeroSection() {
             {/* Floating Stat Card */}
             <div className="absolute bottom-6 left-6 bg-white rounded-2xl shadow-xl p-5 border border-[var(--border)] z-10 animate-in fade-in duration-300">
               <p className="font-brand font-bold text-2xl text-[#F1681D]">
-                {COMPANY_INFO.foundedYear}
+                {companyInfo.foundedYear || "2025"}
               </p>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Founded year</p>
             </div>

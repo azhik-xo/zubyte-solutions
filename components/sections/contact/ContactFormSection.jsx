@@ -3,14 +3,15 @@
 import React, { useState } from "react";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
-import { COMPANY_INFO, GLOBAL_OFFICES } from "@/data/company";
+import { useCompany } from "@/context/CompanyContext";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 
 /**
- * Validated Contact Form Section with dynamic file upload handling
+ * Validated Contact Form Section with dynamic file upload handling and dynamic company contact info
  */
 export default function ContactFormSection() {
+  const { companyInfo, offices } = useCompany();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -383,10 +384,10 @@ export default function ContactFormSection() {
                 Direct Inquiries
               </p>
               <p className="font-heading font-bold text-xl sm:text-2xl text-[#1b1b1b] mb-1">
-                {COMPANY_INFO.email}
+                {companyInfo.email}
               </p>
               <p className="text-sm text-[var(--muted-foreground)] mb-6">
-                {COMPANY_INFO.phone}
+                {companyInfo.phone}
               </p>
 
               <div className="border-t border-[var(--border)] pt-6">
@@ -394,7 +395,7 @@ export default function ContactFormSection() {
                   Global Headquarters
                 </p>
                 <p className="text-sm text-[#1b1b1b] leading-relaxed mb-6">
-                  {GLOBAL_OFFICES[0].address}
+                  {offices[0]?.address || "One World Trade Center, Suite 4500, New York, NY 10007, United States"}
                 </p>
               </div>
 

@@ -1,12 +1,16 @@
+"use client";
+
 import React from "react";
 import Container from "@/components/ui/Container";
 import Reveal from "@/components/ui/Reveal";
-import { STORY_MILESTONES } from "@/data/company";
+import { useCompany } from "@/context/CompanyContext";
 
 /**
- * Our Story Section with pull-quote band and milestones
+ * Our Story Section with pull-quote band and dynamic milestones
  */
 export default function OurStorySection() {
+  const { storyMilestones, companyInfo, leadership } = useCompany();
+
   return (
     <section className="bg-[var(--background)] py-0">
       {/* Top Band: Dark pull-quote */}
@@ -24,7 +28,7 @@ export default function OurStorySection() {
                 className="md:col-span-9 font-heading font-bold text-white leading-snug"
                 style={{ fontSize: "clamp(1.5rem, 3vw, 2.3rem)" }}
               >
-                “Technology should recede into the background — freeing people to do their best work without friction.”
+                “{leadership.quote || "Technology should recede into the background — freeing people to do their best work without friction."}”
               </blockquote>
             </div>
           </Reveal>
@@ -48,14 +52,16 @@ export default function OurStorySection() {
 
               {/* Floating Badge */}
               <div className="absolute -bottom-5 -right-4 sm:right-6 bg-white rounded-2xl shadow-xl p-5 border border-[var(--border)]">
-                <p className="font-brand font-bold text-3xl text-[#F1681D]">2025</p>
+                <p className="font-brand font-bold text-3xl text-[#F1681D]">
+                  {companyInfo.foundedYear || "2025"}
+                </p>
                 <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Founded</p>
               </div>
             </Reveal>
 
             {/* Right Story Content */}
             <Reveal direction="up" delay={150} duration={700} className="flex flex-col gap-8 pt-4">
-              {STORY_MILESTONES.map((item) => (
+              {storyMilestones.map((item) => (
                 <div key={item.num} className="flex gap-5 group">
                   <div
                     className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white mt-1 shadow-sm"

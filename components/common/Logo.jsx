@@ -16,7 +16,7 @@ export default function Logo({
 }) {
   const content = (
     <div className={cn("inline-flex items-center gap-2.5 group cursor-pointer", className)}>
-      <div className="w-7 h-[23px] shrink-0 transition-transform group-hover:scale-105 duration-200">
+      <div className="w-7 h-5.75 shrink-0 transition-transform group-hover:scale-105 duration-200">
         <ZZMark
           className="w-full h-full"
           fill={light ? "#ffffff" : "#1b1b1b"}

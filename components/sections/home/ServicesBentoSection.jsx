@@ -12,13 +12,13 @@ export default function ServicesBentoSection() {
   const totalServices = SERVICES.reduce((acc, g) => acc + g.items.length, 0);
 
   return (
-    <section className="bg-[var(--background)] py-24 sm:py-28">
+    <section className="bg-(--background) py-24 sm:py-28">
       <Container size="default">
         {/* Header row */}
         <Reveal direction="up" delay={50} duration={600}>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
             <div>
-              <p className="text-xs font-semibold tracking-[0.22em] uppercase text-[var(--muted-foreground)] mb-3">
+              <p className="text-xs font-semibold tracking-[0.22em] uppercase text-(--muted-foreground) mb-3">
                 What we do
               </p>
               <h2
@@ -43,7 +43,7 @@ export default function ServicesBentoSection() {
           <Reveal direction="up" delay={100} duration={700} className="md:col-span-7 flex">
             <Link
               href="/services"
-              className="w-full rounded-3xl p-8 sm:p-10 flex flex-col justify-between min-h-[280px] relative overflow-hidden group transition-all duration-300 border border-white/10 hover:border-white/25 hover:shadow-xl"
+              className="w-full rounded-3xl p-8 sm:p-10 flex flex-col justify-between min-h-70 relative overflow-hidden group transition-all duration-300 border border-white/10 hover:border-white/25 hover:shadow-xl"
               style={{ background: "#1b1b1b" }}
             >
               <div className="flex items-start justify-between">
@@ -84,11 +84,11 @@ export default function ServicesBentoSection() {
           <Reveal direction="up" delay={200} duration={700} className="md:col-span-5 flex">
             <Link
               href="/services"
-              className="w-full rounded-3xl p-8 sm:p-10 flex flex-col justify-between min-h-[280px] group transition-all duration-300 shadow-md hover:shadow-xl"
+              className="w-full rounded-3xl p-8 sm:p-10 flex flex-col justify-between min-h-70 group transition-all duration-300 shadow-md hover:shadow-xl"
               style={{ background: "#F1681D" }}
             >
               <div className="flex items-start justify-between">
-                <div>
+                <div >
                   <span className="text-3xl mb-4 block text-white">{SERVICES[1].icon}</span>
                   <h3 className="font-heading font-bold text-white text-2xl sm:text-3xl mb-2">
                     {SERVICES[1].group}
@@ -98,7 +98,7 @@ export default function ServicesBentoSection() {
                   </p>
                 </div>
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white">
-                  {SERVICES[1].items.length} Services
+                  {SERVICES[1].items.length}&nbsp;Services
                 </span>
               </div>
 
@@ -132,7 +132,7 @@ export default function ServicesBentoSection() {
             >
               <Link
                 href="/services"
-                className="w-full rounded-3xl p-7 sm:p-8 flex flex-col justify-between min-h-[240px] group transition-all duration-300 border border-white/10 hover:border-white/25 hover:shadow-lg"
+                className="w-full rounded-3xl p-7 sm:p-8 flex flex-col justify-between min-h-60 group transition-all duration-300 border border-white/10 hover:border-white/25 hover:shadow-lg"
                 style={{
                   background: idx === 2 ? "#0d1f1a" : "#1d1d1d",
                 }}
@@ -187,7 +187,7 @@ export default function ServicesBentoSection() {
         {/* Bottom Banner */}
         <Reveal direction="scale" delay={150} duration={700}>
           <div
-            className="rounded-3xl overflow-hidden relative min-h-[160px] flex items-center shadow-md mt-4"
+            className="rounded-3xl overflow-hidden relative min-h-40 flex items-center shadow-md mt-4"
             style={{ background: "#222222" }}
           >
             <div

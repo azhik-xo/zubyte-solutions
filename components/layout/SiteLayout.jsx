@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
 import PageTransition from "@/components/ui/PageTransition";
+import { CompanyProvider } from "@/context/CompanyContext";
 
 function InnerSiteLayout({ children }) {
   const pathname = usePathname();
@@ -29,8 +30,10 @@ function InnerSiteLayout({ children }) {
 
 export default function SiteLayout({ children }) {
   return (
-    <Suspense fallback={<div className="flex-1 flex flex-col">{children}</div>}>
-      <InnerSiteLayout>{children}</InnerSiteLayout>
-    </Suspense>
+    <CompanyProvider>
+      <Suspense fallback={<div className="flex-1 flex flex-col">{children}</div>}>
+        <InnerSiteLayout>{children}</InnerSiteLayout>
+      </Suspense>
+    </CompanyProvider>
   );
 }
