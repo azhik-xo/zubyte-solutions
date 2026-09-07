@@ -1,7 +1,6 @@
 import "./globals.css";
 import SiteLayout from "@/components/layout/SiteLayout";
 import SmoothScroll from "@/components/ui/SmoothScroll";
-import { COMPANY_INFO } from "@/data/company";
 
 export const metadata = {
   title: {
@@ -49,8 +48,11 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className="min-h-screen flex flex-col bg-[var(--background)] text-[#1b1b1b] antialiased">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <body
+        className="min-h-screen flex flex-col bg-[var(--background)] text-[#1b1b1b] antialiased"
+        suppressHydrationWarning
+      >
         <SmoothScroll>
           <SiteLayout>{children}</SiteLayout>
         </SmoothScroll>

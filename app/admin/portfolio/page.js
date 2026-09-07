@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/components/admin/AuthProvider";
 import { api } from "@/lib/api";
-import { ALL_SERVICE_NAMES } from "@/data/services";
 import Modal from "@/components/admin/Modal";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -13,6 +12,7 @@ const GROUPS = ["Build", "Design", "Grow", "Deploy", "Engineering"];
 
 export default function AdminPortfolioPage() {
   const [caseStudies, setCaseStudies] = useState([]);
+  const [serviceNames, setServiceNames] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,13 +21,14 @@ export default function AdminPortfolioPage() {
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [tagInput, setTagInput] = useState("");
 
   const initialFormState = {
     title: "",
     service: "Web Development",
     group: "Build",
     subcategory: "",
-    tags: "",
+    tags: [],
     img: "",
     shortDesc: "",
     stars: [
@@ -64,20 +65,49 @@ export default function AdminPortfolioPage() {
     fetchProjects();
   }, [selectedGroup, searchQuery]);
 
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await api.services.getAll();
+        if (res.data && Array.isArray(res.data)) {
+          const names = [];
+          res.data.forEach((group) => {
+            if (group.items) {
+              group.items.forEach((item) => {
+                if (item.name && !names.includes(item.name)) names.push(item.name);
+              });
+            }
+          });
+          if (names.length > 0) setServiceNames(names);
+        }
+      } catch (err) {
+        console.error("Failed to load services for portfolio select:", err);
+      }
+    };
+    fetchServices();
+  }, []);
+
   const openCreateModal = () => {
     setEditingProject(null);
     setForm(initialFormState);
+    setTagInput("");
     setIsModalOpen(true);
   };
 
   const openEditModal = (project) => {
     setEditingProject(project);
+    const parsedTags = Array.isArray(project.tags)
+      ? project.tags
+      : typeof project.tags === "string"
+      ? project.tags.split(",").map((t) => t.trim()).filter(Boolean)
+      : [];
+
     setForm({
       title: project.title,
       service: project.service,
       group: project.group || "Build",
       subcategory: project.subcategory || "",
-      tags: project.tags?.join(", ") || "",
+      tags: parsedTags,
       img: project.img || "",
       shortDesc: project.shortDesc,
       stars: project.stars || [
@@ -89,6 +119,7 @@ export default function AdminPortfolioPage() {
       github: project.github || "https://github.com",
       live: project.live || "https://zubyte.com",
     });
+    setTagInput("");
     setIsModalOpen(true);
   };
 
@@ -107,12 +138,18 @@ export default function AdminPortfolioPage() {
 
     setIsSaving(true);
     try {
-      const payload = {
-        ...form,
-        tags: form.tags
+      let finalTags = Array.isArray(form.tags) ? [...form.tags] : [];
+      if (tagInput && tagInput.trim()) {
+        const pending = tagInput
           .split(",")
           .map((t) => t.trim())
-          .filter(Boolean),
+          .filter((t) => t && !finalTags.includes(t));
+        finalTags.push(...pending);
+      }
+
+      const payload = {
+        ...form,
+        tags: finalTags,
       };
 
       if (editingProject) {
@@ -356,7 +393,7 @@ export default function AdminPortfolioPage() {
                 onChange={(e) => setForm({ ...form, service: e.target.value })}
                 className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-[#F1681D]"
               >
-                {ALL_SERVICE_NAMES.map((name) => (
+                {(serviceNames.length > 0 ? serviceNames : [form.service || "Web Development"]).map((name) => (
                   <option key={name} value={name} className="bg-[#141414]">
                     {name}
                   </option>
@@ -365,7 +402,7 @@ export default function AdminPortfolioPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-bold text-white/70 uppercase">Discipline Group</label>
               <select
@@ -391,16 +428,144 @@ export default function AdminPortfolioPage() {
                 className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-[#F1681D]"
               />
             </div>
+          </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-white/70 uppercase">Tech Tags</label>
+          {/* Interactive Multi-Tag Tech Tags Manager */}
+          <div className="flex flex-col gap-2.5 p-4 rounded-2xl bg-white/5 border border-white/10">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-white/80 uppercase tracking-wide">
+                Tech Tags ({form.tags?.length || 0})
+              </label>
+              <span className="text-[10px] text-white/40">
+                Type and press Enter, comma, or "+ Add"
+              </span>
+            </div>
+
+            {/* Active Tag Chips */}
+            <div className="flex flex-wrap gap-1.5 min-h-[38px] p-2 bg-black/40 rounded-xl border border-white/10 items-center">
+              {form.tags && form.tags.length > 0 ? (
+                form.tags.map((tag, idx) => (
+                  <span
+                    key={`${tag}-${idx}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F1681D]/20 text-[#F1681D] border border-[#F1681D]/40 text-xs font-semibold animate-in fade-in"
+                  >
+                    <span>{tag}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = form.tags.filter((_, i) => i !== idx);
+                        setForm({ ...form, tags: updated });
+                      }}
+                      className="w-3.5 h-3.5 rounded-full hover:bg-[#F1681D] hover:text-white flex items-center justify-center text-[10px] transition-colors cursor-pointer"
+                      title="Remove tag"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-white/30 italic px-2">
+                  No tags added yet. Type below or pick a suggestion.
+                </span>
+              )}
+            </div>
+
+            {/* Tag Input Field with Add Button */}
+            <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="Next.js, React, Node.js"
-                value={form.tags}
-                onChange={(e) => setForm({ ...form, tags: e.target.value })}
-                className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-[#F1681D]"
+                placeholder="Type a technology (e.g. Next.js, React, Node.js) and press Enter or comma..."
+                value={tagInput}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.includes(",")) {
+                    const parts = val.split(",");
+                    const newTags = parts
+                      .map((p) => p.trim())
+                      .filter((p) => p && !form.tags?.includes(p));
+                    if (newTags.length > 0) {
+                      setForm({ ...form, tags: [...(form.tags || []), ...newTags] });
+                    }
+                    setTagInput("");
+                  } else {
+                    setTagInput(val);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === ",") {
+                    e.preventDefault();
+                    if (tagInput.trim()) {
+                      const clean = tagInput.trim();
+                      if (!form.tags?.includes(clean)) {
+                        setForm({ ...form, tags: [...(form.tags || []), clean] });
+                      }
+                      setTagInput("");
+                    }
+                  }
+                }}
+                className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-[#F1681D]"
               />
+              <button
+                type="button"
+                onClick={() => {
+                  if (tagInput.trim()) {
+                    const parts = tagInput.split(",").map((p) => p.trim()).filter(Boolean);
+                    const newTags = parts.filter((p) => !form.tags?.includes(p));
+                    if (newTags.length > 0) {
+                      setForm({ ...form, tags: [...(form.tags || []), ...newTags] });
+                    }
+                    setTagInput("");
+                  }
+                }}
+                className="px-4 py-2 bg-[#F1681D] hover:bg-[#d65715] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0 shadow-xs"
+              >
+                + Add Tag
+              </button>
+            </div>
+
+            {/* Quick Popular Technology Suggestions */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mr-1">
+                Quick add:
+              </span>
+              {[
+                "Next.js",
+                "React",
+                "TypeScript",
+                "Node.js",
+                "Python",
+                "Tailwind CSS",
+                "MongoDB",
+                "PostgreSQL",
+                "AWS",
+                "Docker",
+                "GraphQL",
+                "Figma",
+                "REST API",
+                "Redis",
+              ].map((sug) => {
+                const isAlreadyAdded = form.tags?.includes(sug);
+                return (
+                  <button
+                    key={sug}
+                    type="button"
+                    disabled={isAlreadyAdded}
+                    onClick={() => {
+                      if (!isAlreadyAdded) {
+                        setForm({ ...form, tags: [...(form.tags || []), sug] });
+                      }
+                    }}
+                    className={cn(
+                      "text-[10px] px-2 py-0.5 rounded-md border transition-all cursor-pointer",
+                      isAlreadyAdded
+                        ? "bg-white/5 border-white/5 text-white/20 cursor-not-allowed"
+                        : "bg-white/5 border-white/15 text-white/60 hover:bg-[#F1681D]/20 hover:text-[#F1681D] hover:border-[#F1681D]/40"
+                    )}
+                  >
+                    +{sug}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

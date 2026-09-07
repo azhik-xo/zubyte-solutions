@@ -1,13 +1,31 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Container from "@/components/ui/Container";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import { SERVICES } from "@/data/services";
+import { api } from "@/lib/api";
 
 /**
- * Services Hero Section with split layout
+ * Services Hero Section with split layout and live database disciplines count
  */
 export default function ServicesHeroSection() {
+  const [groupCount, setGroupCount] = useState(null);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const res = await api.services.getAll();
+        if (res.data && Array.isArray(res.data)) {
+          setGroupCount(res.data.length);
+        }
+      } catch (err) {
+        console.error("Failed to load services count:", err.message);
+      }
+    };
+    fetchCount();
+  }, []);
+
   return (
     <section className="bg-[var(--background)] pt-36 pb-16 overflow-hidden">
       <Container size="default">
@@ -29,23 +47,23 @@ export default function ServicesHeroSection() {
               <span style={{ color: "#F1681D" }}>Modern Enterprise.</span>
             </h1>
 
-            <p className="text-[var(--muted-foreground)] text-base leading-relaxed max-w-md mb-8">
-              We design and build intelligent systems that drive digital transformation — from foundational cloud infrastructure to advanced AI and responsive user experiences.
+            <p className="text-base sm:text-lg text-[var(--muted-foreground)] leading-relaxed mb-8 max-w-lg">
+              From bespoke web applications to cloud migration and DevOps automation — we deliver the engineering muscle your roadmap demands.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-8 border-t border-[var(--border)]">
-              <Button href="/contact" variant="primary" size="md">
-                Start a Project →
+            <div className="flex flex-wrap items-center gap-4">
+              <Button href="/contact" variant="primary" size="lg">
+                Schedule a Consultation →
               </Button>
-              <Button href="/portfolio" variant="outline" size="md">
-                View Proof of Work
+              <Button href="/portfolio" variant="outline" size="lg">
+                View Case Studies
               </Button>
             </div>
           </div>
 
-          {/* Right Image Composition */}
-          <div className="relative h-[420px] sm:h-[500px]">
-            <div className="absolute inset-0 rounded-3xl overflow-hidden shadow-xl border border-black/5 bg-[#1b1b1b]">
+          {/* Right Visual Image */}
+          <div className="relative rounded-3xl overflow-hidden aspect-[4/3] bg-[#222222] shadow-2xl border border-[var(--border)]">
+            <div className="absolute inset-0">
               <img
                 src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=900&h=1000&fit=crop&crop=center&auto=format"
                 alt="Technology network and cloud systems"
@@ -58,7 +76,7 @@ export default function ServicesHeroSection() {
             {/* Floating Service Count Badge */}
             <div className="absolute bottom-6 left-6 bg-white rounded-2xl shadow-xl p-5 border border-[var(--border)] z-10 animate-in fade-in duration-300">
               <p className="font-brand font-bold text-2xl text-[#F1681D]">
-                {SERVICES.length}
+                {groupCount !== null ? groupCount : "—"}
               </p>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Discipline groups</p>
             </div>
@@ -76,4 +94,3 @@ export default function ServicesHeroSection() {
     </section>
   );
 }
-

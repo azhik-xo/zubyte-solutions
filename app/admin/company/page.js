@@ -17,6 +17,7 @@ const TABS = [
   { id: "milestones", label: "Story & Milestones", icon: "📜" },
   { id: "offices", label: "Global Offices", icon: "🌍" },
   { id: "faqs", label: "FAQ Library", icon: "❓" },
+  { id: "process", label: "Delivery Methodology", icon: "⚡" },
 ];
 
 export default function AdminCompanyPage() {
@@ -54,6 +55,7 @@ export default function AdminCompanyPage() {
   const [storyMilestones, setStoryMilestones] = useState([]);
   const [offices, setOffices] = useState([]);
   const [faqs, setFaqs] = useState([]);
+  const [processSteps, setProcessSteps] = useState([]);
 
   // Client modal
   const [clientModalOpen, setClientModalOpen] = useState(false);
@@ -99,6 +101,7 @@ export default function AdminCompanyPage() {
         setStoryMilestones(d.storyMilestones || []);
         setOffices(d.offices || []);
         setFaqs(d.faqs || []);
+        setProcessSteps(d.processSteps || []);
       }
     } catch (err) {
       showNotification("Failed to load company data: " + err.message, "error");
@@ -213,6 +216,18 @@ export default function AdminCompanyPage() {
       showNotification("FAQs updated successfully!");
     } catch (err) {
       showNotification("Error saving FAQs: " + err.message, "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveProcess = async () => {
+    try {
+      setSaving(true);
+      await api.company.updateProcessSteps(processSteps);
+      showNotification("Delivery process methodology updated successfully!");
+    } catch (err) {
+      showNotification("Error saving process steps: " + err.message, "error");
     } finally {
       setSaving(false);
     }
@@ -1005,6 +1020,88 @@ export default function AdminCompanyPage() {
                       }}
                       className="w-full px-4 py-2 rounded-xl bg-black/40 border border-white/10 text-white/70 text-xs focus:border-[#F1681D] focus:outline-none"
                       placeholder="Answer..."
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 9: PROCESS METHODOLOGY */}
+          {activeTab === "process" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-white">Delivery Methodology (4-Phase Architecture)</h3>
+                  <p className="text-xs text-white/50">
+                    Customize the 4-phase agile methodology displayed on the Services page.
+                  </p>
+                </div>
+                {isAuthorized && (
+                  <button
+                    type="button"
+                    onClick={handleSaveProcess}
+                    disabled={saving}
+                    className="px-5 py-2 rounded-xl bg-[#F1681D] hover:bg-[#d65715] text-white text-xs font-bold transition-all shadow-md cursor-pointer disabled:opacity-50"
+                  >
+                    {saving ? "Saving..." : "Save Process Methodology"}
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {processSteps.map((step, idx) => (
+                  <div
+                    key={step.step || idx}
+                    className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="text"
+                        value={step.step}
+                        onChange={(e) => {
+                          const next = [...processSteps];
+                          next[idx].step = e.target.value;
+                          setProcessSteps(next);
+                        }}
+                        className="w-16 px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white font-mono text-xs font-bold text-center focus:border-[#F1681D] focus:outline-none"
+                        placeholder="01"
+                      />
+                      <input
+                        type="text"
+                        value={step.name}
+                        onChange={(e) => {
+                          const next = [...processSteps];
+                          next[idx].name = e.target.value;
+                          setProcessSteps(next);
+                        }}
+                        className="flex-1 px-4 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-sm font-bold focus:border-[#F1681D] focus:outline-none"
+                        placeholder="Phase Name (e.g. Discovery)"
+                      />
+                    </div>
+
+                    <input
+                      type="text"
+                      value={step.desc}
+                      onChange={(e) => {
+                        const next = [...processSteps];
+                        next[idx].desc = e.target.value;
+                        setProcessSteps(next);
+                      }}
+                      className="w-full px-4 py-1.5 rounded-xl bg-black/40 border border-white/10 text-[#F1681D] text-xs font-semibold focus:border-[#F1681D] focus:outline-none"
+                      placeholder="One-line tagline summary..."
+                    />
+
+                    <textarea
+                      rows={2}
+                      value={step.detail}
+                      onChange={(e) => {
+                        const next = [...processSteps];
+                        next[idx].detail = e.target.value;
+                        setProcessSteps(next);
+                      }}
+                      className="w-full px-4 py-2 rounded-xl bg-black/40 border border-white/10 text-white/70 text-xs focus:border-[#F1681D] focus:outline-none"
+                      placeholder="Comprehensive phase description..."
                     />
                   </div>
                 ))}

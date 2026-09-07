@@ -3,17 +3,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Container from "@/components/ui/Container";
 import { PortfolioCardSkeleton } from "@/components/ui/Skeleton";
-import { PORTFOLIO_PROJECTS as FALLBACK_PROJECTS } from "@/data/portfolio";
-import { SERVICES as FALLBACK_SERVICES, ALL_SERVICE_NAMES as FALLBACK_NAMES } from "@/data/services";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * Portfolio Explorer with dynamic service & case study fetching from MongoDB and Skeleton state
+ * Portfolio Explorer with dynamic service & case study fetching strictly from MongoDB
  */
 export default function PortfolioExplorerSection({ initialService = "All Services" }) {
-  const [projects, setProjects] = useState(FALLBACK_PROJECTS);
-  const [serviceGroups, setServiceGroups] = useState(FALLBACK_SERVICES);
+  const [projects, setProjects] = useState([]);
+  const [serviceGroups, setServiceGroups] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState(initialService || "All Services");
   const [activeGroup, setActiveGroup] = useState("All");
   const [hoveredProject, setHoveredProject] = useState(null);
@@ -23,18 +21,19 @@ export default function PortfolioExplorerSection({ initialService = "All Service
   useEffect(() => {
     const fetchLivePortfolio = async () => {
       try {
+        setIsLoading(true);
         const [portRes, servRes] = await Promise.all([
           api.portfolio.getAll(),
           api.services.getAll(),
         ]);
-        if (portRes.data && portRes.data.length > 0) {
+        if (portRes.data && Array.isArray(portRes.data)) {
           setProjects(portRes.data);
         }
-        if (servRes.data && servRes.data.length > 0) {
+        if (servRes.data && Array.isArray(servRes.data)) {
           setServiceGroups(servRes.data);
         }
       } catch (err) {
-        console.warn("Could not fetch live portfolio from DB, using cache:", err.message);
+        console.error("Failed to fetch live portfolio from DB:", err.message);
       } finally {
         setIsLoading(false);
       }
@@ -75,8 +74,11 @@ export default function PortfolioExplorerSection({ initialService = "All Service
         });
       }
     });
-    return names.length > 0 ? names : FALLBACK_NAMES;
-  }, [serviceGroups]);
+    projects.forEach((p) => {
+      if (p.service && !names.includes(p.service)) names.push(p.service);
+    });
+    return names;
+  }, [serviceGroups, projects]);
 
   // Discipline groups list
   const groups = useMemo(() => {

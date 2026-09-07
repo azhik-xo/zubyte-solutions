@@ -1,94 +1,111 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import {
-  COMPANY_INFO as FALLBACK_INFO,
-  LEADERSHIP as FALLBACK_LEADERSHIP,
-  SOCIAL_PROOF_STATS as FALLBACK_STATS,
-  CLIENT_LOGOS as FALLBACK_CLIENTS,
-  CORE_VALUES as FALLBACK_VALUES,
-  STORY_MILESTONES as FALLBACK_MILESTONES,
-  GLOBAL_OFFICES as FALLBACK_OFFICES,
-} from "@/data/company";
 import { api } from "@/lib/api";
 
+const DEFAULT_INFO = {
+  name: "Zubyte Solution",
+  legalName: "Zubyte IT Solutions Inc.",
+  shortName: "Zubyte",
+  tagline: "Where Ideas Evolve Into Products",
+  description: "",
+  email: "hello@zubyte.org",
+  phone: "+1 (800) 555-0199",
+  foundedYear: "2025",
+  copyrightYear: new Date().getFullYear(),
+};
+
+const DEFAULT_LEADERSHIP = {
+  name: "",
+  role: "",
+  initials: "DM",
+  quote: "",
+};
+
 const CompanyContext = createContext({
-  companyInfo: FALLBACK_INFO,
-  leadership: FALLBACK_LEADERSHIP.founder,
-  stats: FALLBACK_STATS,
+  companyInfo: DEFAULT_INFO,
+  leadership: DEFAULT_LEADERSHIP,
+  stats: [],
   clientLogos: [],
-  coreValues: FALLBACK_VALUES,
-  storyMilestones: FALLBACK_MILESTONES,
-  offices: FALLBACK_OFFICES,
+  coreValues: [],
+  storyMilestones: [],
+  offices: [],
   faqs: [],
+  processSteps: [],
   isLoading: true,
   refreshCompany: async () => {},
 });
 
 export function CompanyProvider({ children }) {
-  const [companyInfo, setCompanyInfo] = useState(FALLBACK_INFO);
-  const [leadership, setLeadership] = useState(FALLBACK_LEADERSHIP.founder);
-  const [stats, setStats] = useState(FALLBACK_STATS);
+  const [companyInfo, setCompanyInfo] = useState(DEFAULT_INFO);
+  const [leadership, setLeadership] = useState(DEFAULT_LEADERSHIP);
+  const [stats, setStats] = useState([]);
   const [clientLogos, setClientLogos] = useState([]);
-  const [coreValues, setCoreValues] = useState(FALLBACK_VALUES);
-  const [storyMilestones, setStoryMilestones] = useState(FALLBACK_MILESTONES);
-  const [offices, setOffices] = useState(FALLBACK_OFFICES);
+  const [coreValues, setCoreValues] = useState([]);
+  const [storyMilestones, setStoryMilestones] = useState([]);
+  const [offices, setOffices] = useState([]);
   const [faqs, setFaqs] = useState([]);
+  const [processSteps, setProcessSteps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchCompanyData = useCallback(async () => {
     try {
+      setIsLoading(true);
       const res = await api.company.getInfo();
       if (res && res.data) {
         const d = res.data;
 
         setCompanyInfo({
-          name: d.name || FALLBACK_INFO.name,
-          legalName: d.legalName || FALLBACK_INFO.legalName,
-          shortName: d.shortName || FALLBACK_INFO.shortName,
-          tagline: d.tagline || FALLBACK_INFO.tagline,
-          description: d.description || FALLBACK_INFO.description,
-          email: d.email || FALLBACK_INFO.email,
-          phone: d.phone || FALLBACK_INFO.phone,
-          foundedYear: d.foundedYear || FALLBACK_INFO.foundedYear,
+          name: d.name || DEFAULT_INFO.name,
+          legalName: d.legalName || DEFAULT_INFO.legalName,
+          shortName: d.shortName || DEFAULT_INFO.shortName,
+          tagline: d.tagline || DEFAULT_INFO.tagline,
+          description: d.description || "",
+          email: d.email || DEFAULT_INFO.email,
+          phone: d.phone || DEFAULT_INFO.phone,
+          foundedYear: d.foundedYear || DEFAULT_INFO.foundedYear,
           copyrightYear: new Date().getFullYear(),
         });
 
-        if (d.leadership && d.leadership.name) {
+        if (d.leadership) {
           setLeadership({
-            name: d.leadership.name || FALLBACK_LEADERSHIP.founder.name,
-            role: d.leadership.role || FALLBACK_LEADERSHIP.founder.role,
-            initials: d.leadership.initials || FALLBACK_LEADERSHIP.founder.initials,
-            quote: d.leadership.quote || FALLBACK_LEADERSHIP.founder.quote,
+            name: d.leadership.name || "",
+            role: d.leadership.role || "",
+            initials: d.leadership.initials || "DM",
+            quote: d.leadership.quote || "",
           });
         }
 
-        if (Array.isArray(d.stats) && d.stats.length > 0) {
+        if (Array.isArray(d.stats)) {
           setStats(d.stats);
         }
 
-        if (Array.isArray(d.clientLogos) && d.clientLogos.length > 0) {
+        if (Array.isArray(d.clientLogos)) {
           setClientLogos(d.clientLogos);
         }
 
-        if (Array.isArray(d.coreValues) && d.coreValues.length > 0) {
+        if (Array.isArray(d.coreValues)) {
           setCoreValues(d.coreValues);
         }
 
-        if (Array.isArray(d.storyMilestones) && d.storyMilestones.length > 0) {
+        if (Array.isArray(d.storyMilestones)) {
           setStoryMilestones(d.storyMilestones);
         }
 
-        if (Array.isArray(d.offices) && d.offices.length > 0) {
+        if (Array.isArray(d.offices)) {
           setOffices(d.offices);
         }
 
-        if (Array.isArray(d.faqs) && d.faqs.length > 0) {
+        if (Array.isArray(d.faqs)) {
           setFaqs(d.faqs);
+        }
+
+        if (Array.isArray(d.processSteps)) {
+          setProcessSteps(d.processSteps);
         }
       }
     } catch (err) {
-      console.warn("Could not fetch live company data from DB, using cache:", err.message);
+      console.error("Failed to fetch live company data from DB:", err.message);
     } finally {
       setIsLoading(false);
     }
@@ -109,6 +126,7 @@ export function CompanyProvider({ children }) {
         storyMilestones,
         offices,
         faqs,
+        processSteps,
         isLoading,
         refreshCompany: fetchCompanyData,
       }}

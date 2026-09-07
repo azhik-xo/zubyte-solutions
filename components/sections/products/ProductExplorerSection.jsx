@@ -4,27 +4,27 @@ import React, { useState, useEffect } from "react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import { ProductCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
-import { PRODUCT_CATEGORIES as FALLBACK_CATEGORIES } from "@/data/products";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /**
- * 20/80 Split Product Explorer fetching live product suites from MongoDB with Skeleton states
+ * 20/80 Split Product Explorer fetching live product suites strictly from MongoDB
  */
 export default function ProductExplorerSection() {
-  const [productSuites, setProductSuites] = useState(FALLBACK_CATEGORIES);
+  const [productSuites, setProductSuites] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All Products");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchLiveProducts = async () => {
       try {
+        setIsLoading(true);
         const res = await api.products.getAll();
-        if (res.data && res.data.length > 0) {
+        if (res.data && Array.isArray(res.data)) {
           setProductSuites(res.data);
         }
       } catch (err) {
-        console.warn("Could not fetch live products from DB, using fallback:", err.message);
+        console.error("Failed to fetch live products from DB:", err.message);
       } finally {
         setIsLoading(false);
       }
