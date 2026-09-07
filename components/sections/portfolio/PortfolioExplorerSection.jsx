@@ -197,10 +197,10 @@ export default function PortfolioExplorerSection({ initialService = "All Service
   };
 
   return (
-    <section className="bg-[var(--background)] py-16 sm:py-20">
+    <section className="bg-(--background) py-16 sm:py-20">
       <Container size="default">
         {/* Top Control Bar: Search & Discipline Tabs */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-6 border-b border-[var(--border)]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-6 border-b border-(--border)">
           {/* Discipline Groups Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
             {groups.map((grp) => {
@@ -215,7 +215,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                     "px-4 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all cursor-pointer select-none",
                     isActive
                       ? "bg-[#1b1b1b] text-white shadow-sm font-bold"
-                      : "text-[var(--muted-foreground)] hover:bg-black/5 hover:text-[#1b1b1b]"
+                      : "text-(--muted-foreground) hover:bg-black/5 hover:text-[#1b1b1b]"
                   )}
                 >
                   {grp.label}
@@ -231,10 +231,10 @@ export default function PortfolioExplorerSection({ initialService = "All Service
               placeholder="Search case studies, tags, tools..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-[var(--border)] bg-white text-xs text-[#1b1b1b] placeholder-[var(--muted-foreground)] focus:border-[#1b1b1b] focus:outline-none transition-colors shadow-2xs"
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-(--border) bg-white text-xs text-[#1b1b1b] placeholder-(--muted-foreground) focus:border-[#1b1b1b] focus:outline-none transition-colors shadow-2xs"
             />
             <svg
-              className="absolute left-3 top-2.5 w-3.5 h-3.5 text-[var(--muted-foreground)]"
+              className="absolute left-3 top-2.5 w-3.5 h-3.5 text-(--muted-foreground)"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -249,7 +249,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-2 text-xs text-[var(--muted-foreground)] hover:text-[#1b1b1b]"
+                className="absolute right-3 top-2 text-xs text-(--muted-foreground) hover:text-[#1b1b1b]"
               >
                 ✕
               </button>
@@ -260,10 +260,10 @@ export default function PortfolioExplorerSection({ initialService = "All Service
         {/* All Individual Services Filter List */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[11px] font-bold tracking-widest uppercase text-[var(--muted-foreground)]">
+            <p className="text-[11px] font-bold tracking-widest uppercase text-(--muted-foreground)">
               Available Service Filters ({visibleFilterOptions.length})
             </p>
-            <span className="text-xs text-[var(--muted-foreground)]">
+            <span className="text-xs text-(--muted-foreground)">
               Showing {filteredProjects.length} {filteredProjects.length === 1 ? "case study" : "case studies"}
             </span>
           </div>
@@ -283,7 +283,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                     "inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer select-none border",
                     isSelected
                       ? "bg-[#F1681D] text-white border-[#F1681D] shadow-sm font-bold scale-[1.02]"
-                      : "bg-white text-[#555555] border-[var(--border)] hover:border-[#1b1b1b] hover:text-[#1b1b1b]"
+                      : "bg-white text-[#555555] border-(--border) hover:border-[#1b1b1b] hover:text-[#1b1b1b]"
                   )}
                 >
                   <span>{serviceName}</span>
@@ -292,7 +292,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                       "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
                       isSelected
                         ? "bg-white/25 text-white"
-                        : "bg-[var(--secondary)] text-[var(--muted-foreground)]"
+                        : "bg-(--secondary) text-(--muted-foreground)"
                     )}
                   >
                     {count}
@@ -311,11 +311,11 @@ export default function PortfolioExplorerSection({ initialService = "All Service
             ))}
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-3xl border border-[var(--border)] shadow-xs">
+          <div className="text-center py-24 bg-white rounded-3xl border border-(--border) shadow-xs">
             <p className="text-lg font-heading font-bold text-[#1b1b1b] mb-2">
               No matching case studies found
             </p>
-            <p className="text-[var(--muted-foreground)] text-sm mb-6 max-w-sm mx-auto">
+            <p className="text-(--muted-foreground) text-sm mb-6 max-w-sm mx-auto">
               We did not find case studies matching "{selectedFilter}". You can reset the filters to view all work.
             </p>
             <button
@@ -343,7 +343,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                   key={project._id || project.title || idx}
                   onMouseEnter={() => setHoveredProject(project._id || idx)}
                   onMouseLeave={() => setHoveredProject(null)}
-                  className="bg-white border border-[var(--border)] rounded-3xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative"
+                  className="bg-white border border-(--border) rounded-3xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative"
                 >
                   {/* Visual Header Image */}
                   <div className="relative h-48 sm:h-52 overflow-hidden bg-[#222222]">
@@ -357,7 +357,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
                     {/* Discipline / Subcategory Badge */}
                     <div className="absolute top-4 left-4 flex gap-2 z-10">
@@ -411,13 +411,13 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                   {/* Body Content */}
                   <div className="p-6 sm:p-7 flex flex-col gap-4 flex-1 justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-[var(--muted-foreground)] leading-relaxed mb-4 line-clamp-2">
+                      <p className="text-xs sm:text-sm text-(--muted-foreground) leading-relaxed mb-4 line-clamp-2">
                         {project.shortDesc}
                       </p>
 
                       {/* STAR Breakdown Pills Accordion / List */}
                       {project.stars && project.stars.length > 0 && (
-                        <div className="space-y-2 pt-3 border-t border-[var(--border)]">
+                        <div className="space-y-2 pt-3 border-t border-(--border)">
                           {project.stars.map((step) => {
                             const isResult = step.label.toLowerCase() === "result";
 
@@ -428,7 +428,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                                   "p-2.5 rounded-xl text-xs flex items-start gap-2.5 transition-colors",
                                   isResult
                                     ? "bg-emerald-500/10 border border-emerald-500/20 text-[#1b1b1b]"
-                                    : "bg-[var(--secondary)]/60 text-[var(--muted-foreground)]"
+                                    : "bg-(--secondary)/60 text-(--muted-foreground)"
                                 )}
                               >
                                 <span
@@ -452,12 +452,12 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                     </div>
 
                     {/* Tags & Live Link Bubble footer */}
-                    <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between gap-2 mt-auto">
+                    <div className="pt-4 border-t border-(--border) flex items-center justify-between gap-2 mt-auto">
                       <div className="flex flex-wrap gap-1.5">
                         {project.tags?.slice(0, 3).map((tag) => (
                           <span
                             key={tag}
-                            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-md bg-[var(--secondary)] text-[var(--muted-foreground)] border border-[var(--border)]"
+                            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-md bg-(--secondary) text-(--muted-foreground) border border-(--border)"
                           >
                             {tag}
                           </span>
@@ -470,7 +470,7 @@ export default function PortfolioExplorerSection({ initialService = "All Service
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="w-8 h-8 rounded-full bg-[var(--secondary)] border border-[var(--border)] text-[#1b1b1b] hover:bg-[#F1681D] hover:text-white hover:border-[#F1681D] flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-2xs group-hover:bg-[#F1681D] group-hover:text-white group-hover:border-[#F1681D] cursor-pointer shrink-0"
+                          className="w-8 h-8 rounded-full bg-(--secondary) border border-(--border) text-[#1b1b1b] hover:bg-[#F1681D] hover:text-white hover:border-[#F1681D] flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-2xs group-hover:bg-[#F1681D] group-hover:text-white group-hover:border-[#F1681D] cursor-pointer shrink-0"
                           title={`Visit Live System: ${liveUrl}`}
                           aria-label="Open live link"
                         >

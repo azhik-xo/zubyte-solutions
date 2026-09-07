@@ -278,7 +278,7 @@ export default function AdminPortfolioPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-black/40" />
+                  <div className="absolute inset-0 bg-linear-to-t from-[#141414] via-transparent to-black/40" />
 
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
                     <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-[#F1681D] text-white shadow-sm">
@@ -442,7 +442,7 @@ export default function AdminPortfolioPage() {
             </div>
 
             {/* Active Tag Chips */}
-            <div className="flex flex-wrap gap-1.5 min-h-[38px] p-2 bg-black/40 rounded-xl border border-white/10 items-center">
+            <div className="flex flex-wrap gap-1.5 min-h-9.5 p-2 bg-black/40 rounded-xl border border-white/10 items-center">
               {form.tags && form.tags.length > 0 ? (
                 form.tags.map((tag, idx) => (
                   <span

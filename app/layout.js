@@ -50,7 +50,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
-        className="min-h-screen flex flex-col bg-[var(--background)] text-[#1b1b1b] antialiased"
+        className="min-h-screen flex flex-col bg-(--background) text-[#1b1b1b] antialiased"
         suppressHydrationWarning
       >
         <SmoothScroll>
