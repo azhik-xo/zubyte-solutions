@@ -329,113 +329,168 @@ export default function PortfolioExplorerSection({ initialService = "All Service
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredProjects.map((project, idx) => (
-              <div
-                key={project._id || project.title || idx}
-                onMouseEnter={() => setHoveredProject(project._id || idx)}
-                onMouseLeave={() => setHoveredProject(null)}
-                className="bg-white border border-[var(--border)] rounded-3xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group"
-              >
-                {/* Visual Header Image */}
-                <div className="relative h-48 sm:h-52 overflow-hidden bg-[#222222]">
-                  <img
-                    src={
-                      project.img?.startsWith("http") || project.img?.startsWith("/")
-                        ? project.img
-                        : `https://images.unsplash.com/${project.img}?w=700&h=450&fit=crop&auto=format`
-                    }
-                    alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            {filteredProjects.map((project, idx) => {
+              const liveUrl = project.live?.startsWith("http")
+                ? project.live
+                : project.live
+                ? `https://${project.live}`
+                : project.link || project.url;
 
-                  {/* Discipline / Subcategory Badge */}
-                  <div className="absolute top-4 left-4 flex gap-2">
-                    <span className="text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20">
-                      {project.group || "Engineering"}
-                    </span>
-                    {project.subcategory && (
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white">
-                        {project.subcategory}
+              return (
+                <div
+                  key={project._id || project.title || idx}
+                  onMouseEnter={() => setHoveredProject(project._id || idx)}
+                  onMouseLeave={() => setHoveredProject(null)}
+                  className="bg-white border border-[var(--border)] rounded-3xl overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative"
+                >
+                  {/* Visual Header Image */}
+                  <div className="relative h-48 sm:h-52 overflow-hidden bg-[#222222]">
+                    <img
+                      src={
+                        project.img?.startsWith("http") || project.img?.startsWith("/")
+                          ? project.img
+                          : `https://images.unsplash.com/${project.img}?w=700&h=450&fit=crop&auto=format`
+                      }
+                      alt={project.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                    {/* Discipline / Subcategory Badge */}
+                    <div className="absolute top-4 left-4 flex gap-2 z-10">
+                      <span className="text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20">
+                        {project.group || "Engineering"}
                       </span>
-                    )}
-                  </div>
-
-                  {/* Specific Service pill on bottom left */}
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <p className="text-[11px] font-semibold text-[#F1681D] tracking-wider uppercase mb-1">
-                      {project.service}
-                    </p>
-                    <h3 className="font-heading font-bold text-white text-lg sm:text-xl leading-snug line-clamp-1">
-                      {project.title}
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Body Content */}
-                <div className="p-6 sm:p-7 flex flex-col gap-4 flex-1 justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm text-[var(--muted-foreground)] leading-relaxed mb-4 line-clamp-2">
-                      {project.shortDesc}
-                    </p>
-
-                    {/* STAR Breakdown Pills Accordion / List */}
-                    {project.stars && project.stars.length > 0 && (
-                      <div className="space-y-2 pt-3 border-t border-[var(--border)]">
-                        {project.stars.map((step) => {
-                          const isResult = step.label.toLowerCase() === "result";
-
-                          return (
-                            <div
-                              key={step.label}
-                              className={cn(
-                                "p-2.5 rounded-xl text-xs flex items-start gap-2.5 transition-colors",
-                                isResult
-                                  ? "bg-emerald-500/10 border border-emerald-500/20 text-[#1b1b1b]"
-                                  : "bg-[var(--secondary)]/60 text-[var(--muted-foreground)]"
-                              )}
-                            >
-                              <span
-                                className={cn(
-                                  "font-bold text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0",
-                                  isResult
-                                    ? "bg-emerald-500 text-white font-extrabold"
-                                    : "bg-black/10 text-[#1b1b1b]"
-                                )}
-                              >
-                                {step.label}
-                              </span>
-                              <span className="leading-snug text-[11px] flex-1">
-                                {step.text}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tags footer */}
-                  <div className="pt-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-2 mt-auto">
-                    <div className="flex flex-wrap gap-1.5">
-                      {project.tags?.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-[10px] font-semibold px-2.5 py-0.5 rounded-md bg-[var(--secondary)] text-[var(--muted-foreground)] border border-[var(--border)]"
-                        >
-                          {tag}
+                      {project.subcategory && (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white">
+                          {project.subcategory}
                         </span>
-                      ))}
+                      )}
                     </div>
 
-                    <span className="text-xs font-bold text-[#F1681D] group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                      Explore Brief →
-                    </span>
+                    {/* Floating Hover Bubble with Link Icon */}
+                    {liveUrl && (
+                      <a
+                        href={liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/95 hover:bg-[#F1681D] text-[#1b1b1b] hover:text-white shadow-xl backdrop-blur-md flex items-center justify-center opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 hover:scale-110 active:scale-95 transition-all duration-300 ease-out border border-white/40 cursor-pointer"
+                        title={`Visit Live System: ${liveUrl}`}
+                        aria-label="Open live link"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
+                      </a>
+                    )}
+
+                    {/* Specific Service pill on bottom left */}
+                    <div className="absolute bottom-4 left-4 right-4 z-10">
+                      <p className="text-[11px] font-semibold text-[#F1681D] tracking-wider uppercase mb-1">
+                        {project.service}
+                      </p>
+                      <h3 className="font-heading font-bold text-white text-lg sm:text-xl leading-snug line-clamp-1">
+                        {project.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-6 sm:p-7 flex flex-col gap-4 flex-1 justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-[var(--muted-foreground)] leading-relaxed mb-4 line-clamp-2">
+                        {project.shortDesc}
+                      </p>
+
+                      {/* STAR Breakdown Pills Accordion / List */}
+                      {project.stars && project.stars.length > 0 && (
+                        <div className="space-y-2 pt-3 border-t border-[var(--border)]">
+                          {project.stars.map((step) => {
+                            const isResult = step.label.toLowerCase() === "result";
+
+                            return (
+                              <div
+                                key={step.label}
+                                className={cn(
+                                  "p-2.5 rounded-xl text-xs flex items-start gap-2.5 transition-colors",
+                                  isResult
+                                    ? "bg-emerald-500/10 border border-emerald-500/20 text-[#1b1b1b]"
+                                    : "bg-[var(--secondary)]/60 text-[var(--muted-foreground)]"
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    "font-bold text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0",
+                                    isResult
+                                      ? "bg-emerald-500 text-white font-extrabold"
+                                      : "bg-black/10 text-[#1b1b1b]"
+                                  )}
+                                >
+                                  {step.label}
+                                </span>
+                                <span className="leading-snug text-[11px] flex-1">
+                                  {step.text}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Tags & Live Link Bubble footer */}
+                    <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between gap-2 mt-auto">
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.tags?.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-md bg-[var(--secondary)] text-[var(--muted-foreground)] border border-[var(--border)]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      {liveUrl && (
+                        <a
+                          href={liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-8 h-8 rounded-full bg-[var(--secondary)] border border-[var(--border)] text-[#1b1b1b] hover:bg-[#F1681D] hover:text-white hover:border-[#F1681D] flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-2xs group-hover:bg-[#F1681D] group-hover:text-white group-hover:border-[#F1681D] cursor-pointer shrink-0"
+                          title={`Visit Live System: ${liveUrl}`}
+                          aria-label="Open live link"
+                        >
+                          <svg
+                            className="w-3.5 h-3.5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                          </svg>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Container>
