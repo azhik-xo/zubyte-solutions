@@ -208,6 +208,106 @@ export default function AdminCompanyPage() {
     }
   };
 
+  // Delete Office immediately with confirmation & DB sync
+  const handleDeleteOffice = async (index) => {
+    const target = offices[index];
+    const name = target?.city ? `"${target.city}"` : `Office #${index + 1}`;
+    if (!window.confirm(`Are you sure you want to delete ${name}? This will update the database immediately.`)) {
+      return;
+    }
+
+    const previousOffices = [...offices];
+    const updated = offices.filter((_, i) => i !== index);
+    setOffices(updated);
+
+    try {
+      setSaving(true);
+      await api.company.updateOffices(updated);
+      showNotification(`Office ${name} deleted successfully!`);
+    } catch (err) {
+      console.error("Failed to delete office:", err);
+      showNotification("Failed to delete office: " + err.message, "error");
+      setOffices(previousOffices);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete Client Partner immediately with confirmation & DB sync
+  const handleDeleteClient = async (index) => {
+    const target = clients[index];
+    const name = target?.name ? `"${target.name}"` : `Partner #${index + 1}`;
+    if (!window.confirm(`Are you sure you want to remove ${name} from the marquee?`)) {
+      return;
+    }
+
+    const previousClients = [...clients];
+    const updated = clients.filter((_, i) => i !== index);
+    setClients(updated);
+
+    try {
+      setSaving(true);
+      await api.company.updateClients(updated);
+      showNotification(`Client ${name} removed successfully!`);
+    } catch (err) {
+      console.error("Failed to delete client:", err);
+      showNotification("Failed to delete client: " + err.message, "error");
+      setClients(previousClients);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete Principle / Value immediately with confirmation & DB sync
+  const handleDeleteValue = async (index) => {
+    const target = coreValues[index];
+    const name = target?.name ? `"${target.name}"` : `Principle #${index + 1}`;
+    if (!window.confirm(`Are you sure you want to delete ${name}? This will update the database immediately.`)) {
+      return;
+    }
+
+    const previousValues = [...coreValues];
+    const updated = coreValues.filter((_, i) => i !== index);
+    setCoreValues(updated);
+
+    try {
+      setSaving(true);
+      await api.company.updateCoreValues(updated);
+      showNotification(`Principle ${name} deleted successfully!`);
+    } catch (err) {
+      console.error("Failed to delete principle:", err);
+      showNotification("Failed to delete principle: " + err.message, "error");
+      setCoreValues(previousValues);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete Story Milestone immediately with confirmation & DB sync
+  const handleDeleteMilestone = async (index) => {
+    const target = storyMilestones[index];
+    const name = target?.title ? `"${target.title}"` : `Milestone #${index + 1}`;
+    if (!window.confirm(`Are you sure you want to delete ${name}? This will update the database immediately.`)) {
+      return;
+    }
+
+    const previousMilestones = [...storyMilestones];
+    const updated = storyMilestones.filter((_, i) => i !== index);
+    setStoryMilestones(updated);
+
+    try {
+      setSaving(true);
+      await api.company.updateStoryMilestones(updated);
+      showNotification(`Milestone ${name} deleted successfully!`);
+    } catch (err) {
+      console.error("Failed to delete milestone:", err);
+      showNotification("Failed to delete milestone: " + err.message, "error");
+      setStoryMilestones(previousMilestones);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Save FAQs
   const handleSaveFaqs = async () => {
     try {
@@ -216,6 +316,31 @@ export default function AdminCompanyPage() {
       showNotification("FAQs updated successfully!");
     } catch (err) {
       showNotification("Error saving FAQs: " + err.message, "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete FAQ immediately with confirmation & DB sync
+  const handleDeleteFaq = async (index) => {
+    const target = faqs[index];
+    const name = target?.q ? `"${target.q.slice(0, 30)}..."` : `FAQ #${index + 1}`;
+    if (!window.confirm(`Are you sure you want to delete ${name}? This will update the database immediately.`)) {
+      return;
+    }
+
+    const previousFaqs = [...faqs];
+    const updated = faqs.filter((_, i) => i !== index);
+    setFaqs(updated);
+
+    try {
+      setSaving(true);
+      await api.company.updateFaqs(updated);
+      showNotification("FAQ deleted successfully!");
+    } catch (err) {
+      console.error("Failed to delete FAQ:", err);
+      showNotification("Failed to delete FAQ: " + err.message, "error");
+      setFaqs(previousFaqs);
     } finally {
       setSaving(false);
     }
@@ -641,11 +766,11 @@ export default function AdminCompanyPage() {
                             Edit
                           </button>
                           <button
-                            onClick={() => {
-                              const next = clients.filter((_, i) => i !== idx);
-                              setClients(next);
-                            }}
-                            className="text-xs text-red-400 hover:text-red-300"
+                            type="button"
+                            disabled={saving}
+                            onClick={() => handleDeleteClient(idx)}
+                            className="text-xs text-red-400 hover:text-red-300 font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                            title="Remove client partner from marquee"
                           >
                             ✕
                           </button>
@@ -695,7 +820,10 @@ export default function AdminCompanyPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {coreValues.map((val, idx) => (
-                  <div key={idx} className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-4 relative group">
+                  <div
+                    key={val._id || `val-${idx}-${val.num || ""}`}
+                    className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-4 relative group"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <input
@@ -721,8 +849,11 @@ export default function AdminCompanyPage() {
                       </div>
                       {isAuthorized && (
                         <button
-                          onClick={() => setCoreValues(coreValues.filter((_, i) => i !== idx))}
-                          className="text-xs text-red-400 hover:text-red-300"
+                          type="button"
+                          disabled={saving}
+                          onClick={() => handleDeleteValue(idx)}
+                          className="text-xs text-red-400 hover:text-red-300 font-semibold transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1"
+                          title="Delete principle from database"
                         >
                           ✕ Delete
                         </button>
@@ -799,7 +930,10 @@ export default function AdminCompanyPage() {
 
               <div className="space-y-4">
                 {storyMilestones.map((item, idx) => (
-                  <div key={idx} className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col md:flex-row gap-6 items-start">
+                  <div
+                    key={item._id || `milestone-${idx}-${item.num || ""}`}
+                    className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col md:flex-row gap-6 items-start"
+                  >
                     <div className="shrink-0 flex items-center gap-3">
                       <input
                         type="text"
@@ -840,8 +974,11 @@ export default function AdminCompanyPage() {
 
                     {isAuthorized && (
                       <button
-                        onClick={() => setStoryMilestones(storyMilestones.filter((_, i) => i !== idx))}
-                        className="text-xs text-red-400 hover:text-red-300 shrink-0 self-start md:self-center"
+                        type="button"
+                        disabled={saving}
+                        onClick={() => handleDeleteMilestone(idx)}
+                        className="text-xs text-red-400 hover:text-red-300 font-semibold transition-colors disabled:opacity-50 cursor-pointer shrink-0 self-start md:self-center flex items-center gap-1"
+                        title="Delete milestone from database"
                       >
                         ✕ Remove
                       </button>
@@ -864,6 +1001,7 @@ export default function AdminCompanyPage() {
                   {isAuthorized && (
                     <>
                       <button
+                        type="button"
                         onClick={() => {
                           setOffices([
                             ...offices,
@@ -875,6 +1013,7 @@ export default function AdminCompanyPage() {
                         + Add Office
                       </button>
                       <button
+                        type="button"
                         onClick={handleSaveOffices}
                         disabled={saving}
                         className="px-5 py-2 rounded-xl bg-[#F1681D] hover:bg-[#d95510] text-white text-xs font-bold transition-all shadow-md cursor-pointer disabled:opacity-50"
@@ -888,13 +1027,19 @@ export default function AdminCompanyPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {offices.map((loc, idx) => (
-                  <div key={idx} className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between gap-4">
+                  <div
+                    key={loc._id || `office-${idx}-${loc.city || ""}`}
+                    className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between gap-4"
+                  >
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold text-[#F1681D] uppercase tracking-wider">Office #{idx + 1}</span>
                       {isAuthorized && (
                         <button
-                          onClick={() => setOffices(offices.filter((_, i) => i !== idx))}
-                          className="text-xs text-red-400 hover:text-red-300"
+                          type="button"
+                          disabled={saving}
+                          onClick={() => handleDeleteOffice(idx)}
+                          className="text-xs text-red-400 hover:text-red-300 font-semibold transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1"
+                          title="Delete office from database"
                         >
                           ✕ Delete
                         </button>
@@ -985,13 +1130,19 @@ export default function AdminCompanyPage() {
 
               <div className="space-y-4">
                 {faqs.map((faq, idx) => (
-                  <div key={idx} className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3 relative group">
+                  <div
+                    key={faq._id || `faq-${idx}`}
+                    className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3 relative group"
+                  >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-[#F1681D]">Q#{idx + 1}</span>
                       {isAuthorized && (
                         <button
-                          onClick={() => setFaqs(faqs.filter((_, i) => i !== idx))}
-                          className="text-xs text-red-400 hover:text-red-300"
+                          type="button"
+                          disabled={saving}
+                          onClick={() => handleDeleteFaq(idx)}
+                          className="text-xs text-red-400 hover:text-red-300 font-semibold transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1"
+                          title="Delete FAQ from database"
                         >
                           ✕ Delete
                         </button>
